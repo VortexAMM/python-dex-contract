@@ -1,4 +1,4 @@
-Example pf a factory with two exchanges:
+Example of a factory with two exchanges:
 
 factory address : KT1RQJwAQpvjTPDAQmWBAyMcLekh5LUpaKV8; 
 sink address : KT1KJhuGpn8QvKDDB8nYvVyVvbiUZTDvBMpC; 
@@ -10,4 +10,7 @@ liquidity token address : KT19UeguSJgcZSDc5ufExQ7KTkVzNrnzx7R4;
 Example of a factory with no exchanges:
 
 factory address : KT1Dnzyn5Jx2C3Pb21G436KKjv1akRUs7e5Y; 
-sink address : KT1KeJXrkuYJQV1Jwf1f5oWnmM4S7jFmJo3F; 
+sink address : KT1KeJXrkuYJQV1Jwf1f5oWnmM4S7jFmJo3F;
+
+==========================================================================
+

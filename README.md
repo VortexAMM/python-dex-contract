@@ -398,3 +398,15 @@ E-->|swaped smak|tokens
 F-->|tokens to burn|G
 F-->|reward|H
 ```
+
+
+# Contract addresses:
+Factory with no exchanges: KT1Dnzyn5Jx2C3Pb21G436KKjv1akRUs7e5Y
+Sink: KT1KeJXrkuYJQV1Jwf1f5oWnmM4S7jFmJo3F
+
+Factory with exchanges: KT1RQJwAQpvjTPDAQmWBAyMcLekh5LUpaKV8
+Sink: KT1KJhuGpn8QvKDDB8nYvVyVvbiUZTDvBMpC
+Exchange 1: KT1MJcPSBxei9v1TtQkBikcftd5omsPE48gm
+Liquidity token 1: KT1NBcrbsKjmjnSGxBaqwDRr3Xo4AYg2fFVp
+Exchange 2: KT1EDx1yf837ucDTF5zGRynUiJrx8UXHaTPV
+Liquidity token 2: KT19UeguSJgcZSDc5ufExQ7KTkVzNrnzx7R4 

@@ -1,0 +1,26 @@
+2 tokens claimed; 54133 gas; 5868 mutez fee; 
+3 tokens claimed; 80547 gas; 8554 mutez fee; 
+4 tokens claimed; 106961 gas; 11241 mutez fee; 
+5 tokens claimed; 133363 gas; 13926 mutez fee; 
+6 tokens claimed; 159783 gas; 16613 mutez fee; 
+7 tokens claimed; 186203 gas; 19300 mutez fee; 
+8 tokens claimed; 212617 gas; 21986 mutez fee; 
+9 tokens claimed; 239031 gas; 24673 mutez fee; 
+10 tokens claimed; 265445 gas; 27359 mutez fee; 
+12 tokens claimed; 318258 gas 
+15 tokens claimed; 397515 gas 
+20 tokens claimed; 529585 gas 
+38 tokens claimed; 1005029 gas 
+
+after optimization - no view calls made to factory
+
+2 tokens claimed; 41260 gas; 4581 mutez fee; 
+3 tokens claimed; 54961 gas; 5996 mutez fee; 
+
+2 tokens claimed; 34976 gas; 3952 mutez fee; 
+10 tokens claimed; 173537 gas; 18168 mutez fee; 
+15 tokens claimed; 258251 gas; 26865 mutez fee; 
+20 tokens claimed; 342956 gas; 35560 mutez fee; 
+30 tokens claimed; 512362 gas; 52951 mutez fee; 
+50 tokens claimed; 872983 gas; 89913 mutez fee; 
+

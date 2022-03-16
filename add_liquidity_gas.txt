@@ -1,0 +1,3 @@
+new add_liquidity with baker_rewards call : 14213 gas; 
+new add_liquidity with no baker_rewards call : 13433 gas; 
+old add_liquidity : 10257 gas; 

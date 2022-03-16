@@ -1,0 +1,77 @@
+token a: fa1.2 KT1QdUtQVJK7D2ZY6eeHxQ8oNyw5kYNFzrc2 ; token b: fa1.2 KT1RvGpP9BA2C83yQ9XPnx5AE8grPXZ51Kcu ; 50757 gas 
+token a: fa1.2 KT1QdUtQVJK7D2ZY6eeHxQ8oNyw5kYNFzrc2 ; token b: fa1.2 KT1WZrpU2JwL6skmw4EodUyGfPLiH1XN9m2r ; 50757 gas 
+token a: fa1.2 KT1QdUtQVJK7D2ZY6eeHxQ8oNyw5kYNFzrc2 ; token b: fa2 KT1XJAc8Lfv3FqqD4w83J7zhxgmFRu7GbG2N ; 53630 gas 
+token a: fa1.2 KT1QdUtQVJK7D2ZY6eeHxQ8oNyw5kYNFzrc2 ; token b: fa2 KT1Mt6qfChNv3KP8Bz4UR9NXEp3xnkWNLxh9 ; 53630 gas 
+token a: fa1.2 KT1QdUtQVJK7D2ZY6eeHxQ8oNyw5kYNFzrc2 ; token b: fa2 KT1DKhrghisiy3L12UzDgWHCjFiam72QkLFX ; 53630 gas 
+token a: fa1.2 KT1QdUtQVJK7D2ZY6eeHxQ8oNyw5kYNFzrc2 ; token b: fa2 KT1PGoEFAQ4WxTwmkUGcTuaA5BETwE72x6FS ; 53630 gas 
+token a: fa1.2 KT1RvGpP9BA2C83yQ9XPnx5AE8grPXZ51Kcu ; token b: fa1.2 KT1WZrpU2JwL6skmw4EodUyGfPLiH1XN9m2r ; 50760 gas 
+token a: fa1.2 KT1RvGpP9BA2C83yQ9XPnx5AE8grPXZ51Kcu ; token b: fa2 KT1XJAc8Lfv3FqqD4w83J7zhxgmFRu7GbG2N ; 53634 gas 
+token a: fa1.2 KT1RvGpP9BA2C83yQ9XPnx5AE8grPXZ51Kcu ; token b: fa2 KT1Mt6qfChNv3KP8Bz4UR9NXEp3xnkWNLxh9 ; 53634 gas 
+token a: fa1.2 KT1RvGpP9BA2C83yQ9XPnx5AE8grPXZ51Kcu ; token b: fa2 KT1DKhrghisiy3L12UzDgWHCjFiam72QkLFX ; 53634 gas 
+token a: fa1.2 KT1RvGpP9BA2C83yQ9XPnx5AE8grPXZ51Kcu ; token b: fa2 KT1PGoEFAQ4WxTwmkUGcTuaA5BETwE72x6FS ; 53634 gas 
+token a: fa1.2 KT1WZrpU2JwL6skmw4EodUyGfPLiH1XN9m2r ; token b: fa2 KT1XJAc8Lfv3FqqD4w83J7zhxgmFRu7GbG2N ; 53620 gas 
+token a: fa1.2 KT1WZrpU2JwL6skmw4EodUyGfPLiH1XN9m2r ; token b: fa2 KT1Mt6qfChNv3KP8Bz4UR9NXEp3xnkWNLxh9 ; 53620 gas 
+token a: fa1.2 KT1WZrpU2JwL6skmw4EodUyGfPLiH1XN9m2r ; token b: fa2 KT1DKhrghisiy3L12UzDgWHCjFiam72QkLFX ; 53620 gas 
+token a: fa1.2 KT1WZrpU2JwL6skmw4EodUyGfPLiH1XN9m2r ; token b: fa2 KT1PGoEFAQ4WxTwmkUGcTuaA5BETwE72x6FS ; 53620 gas 
+token a: fa2 KT1XJAc8Lfv3FqqD4w83J7zhxgmFRu7GbG2N ; token b: fa2 KT1Mt6qfChNv3KP8Bz4UR9NXEp3xnkWNLxh9 ; 56513 gas 
+token a: fa2 KT1XJAc8Lfv3FqqD4w83J7zhxgmFRu7GbG2N ; token b: fa2 KT1DKhrghisiy3L12UzDgWHCjFiam72QkLFX ; 56514 gas 
+token a: fa2 KT1XJAc8Lfv3FqqD4w83J7zhxgmFRu7GbG2N ; token b: fa2 KT1PGoEFAQ4WxTwmkUGcTuaA5BETwE72x6FS ; 56515 gas 
+token a: fa2 KT1Mt6qfChNv3KP8Bz4UR9NXEp3xnkWNLxh9 ; token b: fa2 KT1DKhrghisiy3L12UzDgWHCjFiam72QkLFX ; 56492 gas 
+token a: fa2 KT1Mt6qfChNv3KP8Bz4UR9NXEp3xnkWNLxh9 ; token b: fa2 KT1PGoEFAQ4WxTwmkUGcTuaA5BETwE72x6FS ; 56492 gas 
+token a: fa2 KT1DKhrghisiy3L12UzDgWHCjFiam72QkLFX ; token b: fa2 KT1PGoEFAQ4WxTwmkUGcTuaA5BETwE72x6FS ; 56507 gas 
+token a: fa1.2 KT1Vy8A9Pik1YeAZxiJoPBs7PcSWRaWfNhJF ; token b: XTZ ; 49029 gas 
+token a: fa1.2 KT1Vy8A9Pik1YeAZxiJoPBs7PcSWRaWfNhJF ; token b: fa1.2 KT1R6zrJ4MjZV7j47juJW41FEvV86ZVAvMYk ; 50761 gas 
+token a: fa1.2 KT1Vy8A9Pik1YeAZxiJoPBs7PcSWRaWfNhJF ; token b: fa1.2 KT19gaWQCWoL5Jzkqk16JuJoJaMXUpFypwXQ ; 50761 gas 
+token a: fa1.2 KT1Vy8A9Pik1YeAZxiJoPBs7PcSWRaWfNhJF ; token b: fa2 KT1EMF3EdpXZ7b9m37XCcJ58u2rtEwGaoXRi ; 53635 gas 
+token a: fa1.2 KT1Vy8A9Pik1YeAZxiJoPBs7PcSWRaWfNhJF ; token b: fa2 KT1Kcu1r5Kb9Vc1p9SjPPmWJ87W8cDgh72MW ; 53635 gas 
+token a: fa1.2 KT1Vy8A9Pik1YeAZxiJoPBs7PcSWRaWfNhJF ; token b: fa2 KT1HruE4nfvw9MgvG93W7vxBsgBYmytSRrsV ; 53635 gas 
+token a: fa1.2 KT1Vy8A9Pik1YeAZxiJoPBs7PcSWRaWfNhJF ; token b: fa2 KT1VN3YMpYdSG4kK2ChDdcGKByDh2kj3cUHq ; 53635 gas 
+token a: fa1.2 KT1R6zrJ4MjZV7j47juJW41FEvV86ZVAvMYk ; token b: XTZ ; 46659 gas 
+token a: fa1.2 KT1R6zrJ4MjZV7j47juJW41FEvV86ZVAvMYk ; token b: fa1.2 KT19gaWQCWoL5Jzkqk16JuJoJaMXUpFypwXQ ; 50765 gas 
+token a: fa1.2 KT1R6zrJ4MjZV7j47juJW41FEvV86ZVAvMYk ; token b: fa2 KT1EMF3EdpXZ7b9m37XCcJ58u2rtEwGaoXRi ; 53638 gas 
+token a: fa1.2 KT1R6zrJ4MjZV7j47juJW41FEvV86ZVAvMYk ; token b: fa2 KT1Kcu1r5Kb9Vc1p9SjPPmWJ87W8cDgh72MW ; 53638 gas 
+token a: fa1.2 KT1R6zrJ4MjZV7j47juJW41FEvV86ZVAvMYk ; token b: fa2 KT1HruE4nfvw9MgvG93W7vxBsgBYmytSRrsV ; 53638 gas 
+token a: fa1.2 KT1R6zrJ4MjZV7j47juJW41FEvV86ZVAvMYk ; token b: fa2 KT1VN3YMpYdSG4kK2ChDdcGKByDh2kj3cUHq ; 53638 gas 
+token a: fa1.2 KT19gaWQCWoL5Jzkqk16JuJoJaMXUpFypwXQ ; token b: XTZ ; 46645 gas 
+token a: fa1.2 KT19gaWQCWoL5Jzkqk16JuJoJaMXUpFypwXQ ; token b: fa2 KT1EMF3EdpXZ7b9m37XCcJ58u2rtEwGaoXRi ; 53624 gas 
+token a: fa1.2 KT19gaWQCWoL5Jzkqk16JuJoJaMXUpFypwXQ ; token b: fa2 KT1Kcu1r5Kb9Vc1p9SjPPmWJ87W8cDgh72MW ; 53624 gas 
+token a: fa1.2 KT19gaWQCWoL5Jzkqk16JuJoJaMXUpFypwXQ ; token b: fa2 KT1HruE4nfvw9MgvG93W7vxBsgBYmytSRrsV ; 53624 gas 
+token a: fa1.2 KT19gaWQCWoL5Jzkqk16JuJoJaMXUpFypwXQ ; token b: fa2 KT1VN3YMpYdSG4kK2ChDdcGKByDh2kj3cUHq ; 53624 gas 
+token a: fa2 KT1EMF3EdpXZ7b9m37XCcJ58u2rtEwGaoXRi ; token b: XTZ ; 49538 gas 
+token a: fa2 KT1EMF3EdpXZ7b9m37XCcJ58u2rtEwGaoXRi ; token b: fa2 KT1Kcu1r5Kb9Vc1p9SjPPmWJ87W8cDgh72MW ; 56519 gas 
+token a: fa2 KT1EMF3EdpXZ7b9m37XCcJ58u2rtEwGaoXRi ; token b: fa2 KT1HruE4nfvw9MgvG93W7vxBsgBYmytSRrsV ; 56519 gas 
+token a: fa2 KT1EMF3EdpXZ7b9m37XCcJ58u2rtEwGaoXRi ; token b: fa2 KT1VN3YMpYdSG4kK2ChDdcGKByDh2kj3cUHq ; 56519 gas 
+token a: fa2 KT1Kcu1r5Kb9Vc1p9SjPPmWJ87W8cDgh72MW ; token b: XTZ ; 49515 gas 
+token a: fa2 KT1Kcu1r5Kb9Vc1p9SjPPmWJ87W8cDgh72MW ; token b: fa2 KT1HruE4nfvw9MgvG93W7vxBsgBYmytSRrsV ; 56493 gas 
+token a: fa2 KT1Kcu1r5Kb9Vc1p9SjPPmWJ87W8cDgh72MW ; token b: fa2 KT1VN3YMpYdSG4kK2ChDdcGKByDh2kj3cUHq ; 56493 gas 
+token a: fa2 KT1HruE4nfvw9MgvG93W7vxBsgBYmytSRrsV ; token b: XTZ ; 49530 gas 
+token a: fa2 KT1HruE4nfvw9MgvG93W7vxBsgBYmytSRrsV ; token b: fa2 KT1VN3YMpYdSG4kK2ChDdcGKByDh2kj3cUHq ; 56508 gas 
+token a: fa2 KT1VN3YMpYdSG4kK2ChDdcGKByDh2kj3cUHq ; token b: XTZ ; 49538 gas 
+token a: fa1.2 KT1QdUtQVJK7D2ZY6eeHxQ8oNyw5kYNFzrc2 ; token b: XTZ ; 49530 gas 
+token a: fa1.2 KT1QdUtQVJK7D2ZY6eeHxQ8oNyw5kYNFzrc2 ; token b: fa1.2 KT1RvGpP9BA2C83yQ9XPnx5AE8grPXZ51Kcu ; 51285 gas 
+token a: fa1.2 KT1QdUtQVJK7D2ZY6eeHxQ8oNyw5kYNFzrc2 ; token b: fa1.2 KT1WZrpU2JwL6skmw4EodUyGfPLiH1XN9m2r ; 51286 gas 
+token a: fa1.2 KT1QdUtQVJK7D2ZY6eeHxQ8oNyw5kYNFzrc2 ; token b: fa2 KT1XJAc8Lfv3FqqD4w83J7zhxgmFRu7GbG2N ; 54157 gas 
+token a: fa1.2 KT1QdUtQVJK7D2ZY6eeHxQ8oNyw5kYNFzrc2 ; token b: fa2 KT1Mt6qfChNv3KP8Bz4UR9NXEp3xnkWNLxh9 ; 54157 gas 
+token a: fa1.2 KT1QdUtQVJK7D2ZY6eeHxQ8oNyw5kYNFzrc2 ; token b: fa2 KT1DKhrghisiy3L12UzDgWHCjFiam72QkLFX ; 54157 gas 
+token a: fa1.2 KT1QdUtQVJK7D2ZY6eeHxQ8oNyw5kYNFzrc2 ; token b: fa2 KT1PGoEFAQ4WxTwmkUGcTuaA5BETwE72x6FS ; 54157 gas 
+token a: fa1.2 KT1RvGpP9BA2C83yQ9XPnx5AE8grPXZ51Kcu ; token b: XTZ ; 47182 gas 
+token a: fa1.2 KT1RvGpP9BA2C83yQ9XPnx5AE8grPXZ51Kcu ; token b: fa1.2 KT1WZrpU2JwL6skmw4EodUyGfPLiH1XN9m2r ; 51289 gas 
+token a: fa1.2 KT1RvGpP9BA2C83yQ9XPnx5AE8grPXZ51Kcu ; token b: fa2 KT1XJAc8Lfv3FqqD4w83J7zhxgmFRu7GbG2N ; 54162 gas 
+token a: fa1.2 KT1RvGpP9BA2C83yQ9XPnx5AE8grPXZ51Kcu ; token b: fa2 KT1Mt6qfChNv3KP8Bz4UR9NXEp3xnkWNLxh9 ; 54162 gas 
+token a: fa1.2 KT1RvGpP9BA2C83yQ9XPnx5AE8grPXZ51Kcu ; token b: fa2 KT1DKhrghisiy3L12UzDgWHCjFiam72QkLFX ; 54162 gas 
+token a: fa1.2 KT1RvGpP9BA2C83yQ9XPnx5AE8grPXZ51Kcu ; token b: fa2 KT1PGoEFAQ4WxTwmkUGcTuaA5BETwE72x6FS ; 54162 gas 
+token a: fa1.2 KT1WZrpU2JwL6skmw4EodUyGfPLiH1XN9m2r ; token b: XTZ ; 47168 gas 
+token a: fa1.2 KT1WZrpU2JwL6skmw4EodUyGfPLiH1XN9m2r ; token b: fa2 KT1XJAc8Lfv3FqqD4w83J7zhxgmFRu7GbG2N ; 54147 gas 
+token a: fa1.2 KT1WZrpU2JwL6skmw4EodUyGfPLiH1XN9m2r ; token b: fa2 KT1Mt6qfChNv3KP8Bz4UR9NXEp3xnkWNLxh9 ; 54147 gas 
+token a: fa1.2 KT1WZrpU2JwL6skmw4EodUyGfPLiH1XN9m2r ; token b: fa2 KT1DKhrghisiy3L12UzDgWHCjFiam72QkLFX ; 54147 gas 
+token a: fa1.2 KT1WZrpU2JwL6skmw4EodUyGfPLiH1XN9m2r ; token b: fa2 KT1PGoEFAQ4WxTwmkUGcTuaA5BETwE72x6FS ; 54147 gas 
+token a: fa2 KT1XJAc8Lfv3FqqD4w83J7zhxgmFRu7GbG2N ; token b: XTZ ; 50061 gas 
+token a: fa2 KT1XJAc8Lfv3FqqD4w83J7zhxgmFRu7GbG2N ; token b: fa2 KT1Mt6qfChNv3KP8Bz4UR9NXEp3xnkWNLxh9 ; 57041 gas 
+token a: fa2 KT1XJAc8Lfv3FqqD4w83J7zhxgmFRu7GbG2N ; token b: fa2 KT1DKhrghisiy3L12UzDgWHCjFiam72QkLFX ; 57041 gas 
+token a: fa2 KT1XJAc8Lfv3FqqD4w83J7zhxgmFRu7GbG2N ; token b: fa2 KT1PGoEFAQ4WxTwmkUGcTuaA5BETwE72x6FS ; 57041 gas 
+token a: fa2 KT1Mt6qfChNv3KP8Bz4UR9NXEp3xnkWNLxh9 ; token b: XTZ ; 50039 gas 
+token a: fa2 KT1Mt6qfChNv3KP8Bz4UR9NXEp3xnkWNLxh9 ; token b: fa2 KT1DKhrghisiy3L12UzDgWHCjFiam72QkLFX ; 57018 gas 
+token a: fa2 KT1Mt6qfChNv3KP8Bz4UR9NXEp3xnkWNLxh9 ; token b: fa2 KT1PGoEFAQ4WxTwmkUGcTuaA5BETwE72x6FS ; 57018 gas 
+token a: fa2 KT1DKhrghisiy3L12UzDgWHCjFiam72QkLFX ; token b: XTZ ; 50056 gas 
+token a: fa2 KT1DKhrghisiy3L12UzDgWHCjFiam72QkLFX ; token b: fa2 KT1PGoEFAQ4WxTwmkUGcTuaA5BETwE72x6FS ; 57035 gas 
+token a: fa2 KT1PGoEFAQ4WxTwmkUGcTuaA5BETwE72x6FS ; token b: XTZ ; 50062 gas 

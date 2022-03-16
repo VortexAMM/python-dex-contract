@@ -1,0 +1,16 @@
+factory FA1.2: KT1QZeBbSvipSQxYpnVcjqWtuKn3HL9YU3hC
+factory FA2: KT1VSGW84PjmWCZgRwXKHW2RtZpng6yYSg8H
+fa2 token: KT1HjSF5me2LDB7wp56Y3BXTe5pVym9gfA9E ; 27216 gas 
+fa2 token: KT1HjSF5me2LDB7wp56Y3BXTe5pVym9gfA9E ; 10000000 amount 
+fa2 token: KT1QL9rGwm2xTnZR3cqdVAYWpCncdmNtci3h ; 22093 gas 
+fa2 token: KT1QL9rGwm2xTnZR3cqdVAYWpCncdmNtci3h ; 10000000 amount 
+fa2 token: KT1W1AdQUe82nA8YZe7bae179YU6FXZQXi69 ; 22093 gas 
+fa2 token: KT1W1AdQUe82nA8YZe7bae179YU6FXZQXi69 ; 10000000 amount 
+fa2 token: KT1E1iMQ6tRs91S4WsbkeJ3XvLYdVpsrqtnS ; 22093 gas 
+fa2 token: KT1E1iMQ6tRs91S4WsbkeJ3XvLYdVpsrqtnS ; 10000000 amount 
+fa1.2 token: KT1KZdZtupMb39G7QMRHS9XmhFvmV5x2QE7y ; 25969 gas 
+fa1.2 token: KT1KZdZtupMb39G7QMRHS9XmhFvmV5x2QE7y ; 10000000 amount 
+fa1.2 token: KT1U8WD8PxDYDioqsXVeajJ6Vft4k45bKNj9 ; 21058 gas 
+fa1.2 token: KT1U8WD8PxDYDioqsXVeajJ6Vft4k45bKNj9 ; 10000000 amount 
+fa1.2 token: KT1NBA8KHEggZSkdnhaKgP2T3UsJHMEEgZ9s ; 21057 gas 
+fa1.2 token: KT1NBA8KHEggZSkdnhaKgP2T3UsJHMEEgZ9s ; 10000000 amount 

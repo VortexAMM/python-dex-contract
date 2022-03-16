@@ -1,0 +1,123 @@
+{ parameter
+    (or (or (pair %approve (address %spender) (mutez %value)) (unit %getBalance))
+        (pair %transfer (address %from) (pair (address %to) (mutez %value)))) ;
+  storage
+    (pair (big_map %ledger address mutez)
+          (big_map %allowances (pair (address %owner) (address %spender)) mutez)) ;
+  code { LAMBDA
+           mutez
+           (option mutez)
+           { PUSH mutez 0 ;
+             SWAP ;
+             DUP ;
+             DUG 2 ;
+             COMPARE ;
+             EQ ;
+             IF { DROP ; NONE mutez } { SOME } } ;
+         SWAP ;
+         UNPAIR ;
+         IF_LEFT
+           { IF_LEFT
+               { SWAP ;
+                 DUP ;
+                 DUG 2 ;
+                 CAR ;
+                 SENDER ;
+                 GET ;
+                 IF_NONE { PUSH nat 3002 ; FAILWITH } {} ;
+                 SWAP ;
+                 DUP ;
+                 DUG 2 ;
+                 CDR ;
+                 COMPARE ;
+                 GT ;
+                 IF { DROP 3 ; PUSH nat 3004 ; FAILWITH }
+                    { SENDER ;
+                      SWAP ;
+                      DUP ;
+                      DUG 2 ;
+                      CAR ;
+                      SWAP ;
+                      PAIR ;
+                      DUP 3 ;
+                      CDR ;
+                      DIG 2 ;
+                      CDR ;
+                      DIG 4 ;
+                      SWAP ;
+                      EXEC ;
+                      DIG 2 ;
+                      UPDATE ;
+                      UPDATE 2 ;
+                      NIL operation ;
+                      PAIR } }
+               { DIG 2 ; DROP 2 ; NIL operation ; PAIR } }
+           { DUP ;
+             CAR ;
+             SENDER ;
+             SWAP ;
+             PAIR ;
+             DUP 3 ;
+             CDR ;
+             SWAP ;
+             DUP ;
+             DUG 2 ;
+             GET ;
+             IF_NONE { PUSH nat 3001 ; FAILWITH } {} ;
+             DUP 4 ;
+             CAR ;
+             DUP 4 ;
+             CAR ;
+             GET ;
+             IF_NONE { PUSH nat 3002 ; FAILWITH } {} ;
+             DUP 4 ;
+             GET 4 ;
+             DUP 3 ;
+             COMPARE ;
+             LT ;
+             IF { PUSH nat 3003 ; FAILWITH } { DUP 4 ; GET 4 } ;
+             DUP ;
+             DUP 3 ;
+             COMPARE ;
+             LT ;
+             IF { DROP ; PUSH nat 3004 ; FAILWITH } {} ;
+             DUP 6 ;
+             CAR ;
+             SWAP ;
+             DUP ;
+             DUG 2 ;
+             DIG 3 ;
+             SUB ;
+             DUP 8 ;
+             SWAP ;
+             EXEC ;
+             DUP 6 ;
+             CAR ;
+             UPDATE ;
+             DUP 6 ;
+             CDR ;
+             DIG 2 ;
+             DIG 3 ;
+             SUB ;
+             DIG 6 ;
+             SWAP ;
+             EXEC ;
+             DIG 3 ;
+             UPDATE ;
+             DIG 3 ;
+             DIG 2 ;
+             UPDATE 1 ;
+             SWAP ;
+             UPDATE 2 ;
+             NIL operation ;
+             DUP 3 ;
+             GET 3 ;
+             CONTRACT unit ;
+             IF_NONE { PUSH string "no contract" ; FAILWITH } {} ;
+             DIG 3 ;
+             GET 4 ;
+             UNIT ;
+             TRANSFER_TOKENS ;
+             CONS ;
+             PAIR } } }
+

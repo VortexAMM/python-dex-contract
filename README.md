@@ -133,6 +133,15 @@ Factory-contract-.-exchange-3
 A--->|dex_storage, lp_storage, am|exchange-4
 ```
 
+The `launchExchange` calls two entrypoints - the `setBaker` entrypoint and the `setLqtAddress` entrypoint.
+
+#### Set baker:
+This is an internal entrypoint, called only by the `launchExchange` entrypoint. It adds a baker to all exchanges with an `XTZ` pool.
+The `baker` is determined by the factory's `default_baker` storage entry.
+For exchanges with no `XTZ` pools, the baker address remains `None`, and `freeze_baker` is set as `True`. All baker reward related actions are disabled for these exchanges.
+#### Set LQT address
+This is an internal entrypoint, called by the `launchExchange` entrypoint. It adds a newly deployed LP token's FA1.2 contract to the launched exchange, with the metadata sent as input to the `launchExchange` entrypoint.
+
 ### Remove exchange:
 This entrypoint is used to remove an individual exchange from the factory's entries. The exchange can still be active after its removal, but is not linked to the system and can be replaced by a differnt exchange for its tokens.
 
@@ -169,12 +178,6 @@ Input parameter: `nat` : the new claim limit.
 This entrypoint is also controlled by a multisig.
 
 
-
-
-
-
-
-
 ### Set Liquidity Address:
 This entrypoint is used as a callback when the `launchExchange` entrypoint is called. It sets an individual exchange's liquidity-token address.
 
@@ -202,14 +205,18 @@ dex-contract-.-C
 dex-contract-.-D
 dex-contract-.-E
 ```
-### launch_sink
-This entry-point is used to launch the sink contract.
 
-### set_sink_claim_limit
-This entry-point is used to update the maximum number of tokens allowed for the smak claim  (against the smak swap and burn).
 
-**Input parameters:**  
-- `param` : maximum number of tokens to be swaped to smak per user claim transaction.
+
+### Update baker
+This entrypoint is used to change the baker for all exchanges with an `XTZ` pool. It also updates the `default_baker` storage entry, for future exchange launches.
+In case there are many exchanges, the number of pools for which the baker is updated can be limited.
+The individual exchanges for which the update is made are accessed by their index in the `pools` big_map. updates are made incrementally for all exchanges in the range `first_pool` to `first_pool + number_of pools`.
+
+Input Parameters:
+`baker : key_hash` the new baker's address.
+`first_pool : nat` the first pool in the update range.
+`number_of_pools` the the number of pools to increment and update over.
 ---
 
 ## Dex
@@ -217,6 +224,10 @@ This entry-point is used to update the maximum number of tokens allowed for the 
 ### add_liquidity
 
 This entry-point is used to add liquidity to the pool.
+The user specifies the amount of `token_a` to be added to `token_pool_a`. the amount of `token_b` to be sent and the liquidity tokens to be minted are calculated according to the exchange's `curve` type.
+`min_lqt_minted` is set so that no less liquidity tokens than the desired amount will be minted. If the amount minted, calculated by the entrypoint, is lower than this value, the operation will fail.
+`max_tokens_deposited` is set so that no more `token_b` amount than the amount desired will be deposited. If the amount calculated by the entrypoint is higher than this value, the operation will fail.
+The `owner` can be an address other than the sender's, in case a sender wants to mint liquidity for a different address.
 
 **Input parameters:** 
 
@@ -278,13 +289,15 @@ C2-.->|token-b-amount|C1
 
 ### remove_liquidity 
 This entry-point is used to remove liquidity from the pool.
+The `lqt_burned` determines how many LP tokens will be sold and burned. Amounts of `token_a` and `token_b` that will be sent in return to the `rem_to` address is calculated by the entrypoint.
+If the amount calculated for `token_a` and `token_b` is lower than `min_token_a_withdrawn` and `min_token_b_withdrawn` respectively, the operation will fail.
 
 **Input parameters:** 
 
 - `rem_to` : destination address ;
 - `lqt_burned` : lp token amount;
-- `min_token_a_withdrawn` : minmum token input amount accepted ;
-- `min_token_b_withdrawn` : minmum token output amount accepted  ;
+- `min_token_a_withdrawn` : minmum token_a amount accepted ;
+- `min_token_b_withdrawn` : minmum token_b amount accepted  ;
 - `deadline` : the deadline of the transaction;
 
 ```mermaid
@@ -340,6 +353,12 @@ C1-.->|tokens b withdrawn|C2
 ### swap
 
 This entry-point is used to swap token a to token b.
+The `tokens_sold` value sets the amount of tokens to be sold. The token sold is determined by the `a_to_b` boolean value. If `a_to_b` is `True`, `token_a` is sold and `token_b` is bought, if it is `False`, `token_b` is sold and `token_a` is bought.
+The amount of tokens bought is calculated according to the exchange's `curve`, and so are the fees related to the swap.
+Fees are reduced from the amount of tokens sold before the amount of tokens bought is calculated.
+Platform fees (burn and reserve) are sent to the sink contract, from which they can be claimed by any user. The percentage of platform fees is 0.03% of `tokens_sold`
+LP fees are added to the liquidity of the sold token pool, inflating the return of tokens when `removeLiquidity` is called. The percentage of LP fees is 0.25% `tokens_sold` for constant-product `curve`, and 0.07% `tokens_sold` for flat `curve`.
+`t2t_to` is the address to which the tokens bought will be transferred.
 
 **Input parameters:** 
 
@@ -404,7 +423,44 @@ H1-.->|tokens sold - platform fees|H2
 H1-.->|platform fees|H3
 ```
 
-### Sink Claim
+### Default:
+The `default` entrypoint is used to send `xtz` to the DEX contract. This entrypoint is only accessible for exchanges with `xtz` as one of the tokens.
+The `default` entrypoint is used to handle baker rewards, and the amount sent to it is added to the `rewards` field.
+No input parameters are required.
+
+### Claim reward:
+This entrypoint is used to claim individual baker rewards by liquidity providers.
+
+Input parameter: `address` the address to which the baker rewards will be sent.
+
+### Update token pool:
+This entrypoint is used to update the token pool, if some changes were made to the token contract's balance.
+No input parameters are required by this entrypoint.
+The `updateTokenPoolInternal` entrypoint is called by this entrypoint.
+
+### Administration entrypoints:
+The following entrypoints are administration entrypoints, accessed only by the factory.
+#### Set baker:
+Used to set the baker's address, for exchanges containing `XTZ` as one of the tokens.
+#### Set LQT address:
+Used to set an LP token address. Used only at exchange launch.
+#### Update sink address:
+Used to update the sink's address.
+
+## Sink
+
+### Claim
+
+This entrypoint is used to send protocol fees to swap (for buying SMAK tokens and burning them - buyback and burn mechanism) - `burn` fees, and to the reserve - `reserve` fees.
+Calling this entrypoint is incentivised by some percentage of the bought SMAK tokens at the buyback proccess being sent to the entrypoint caller or another chosen address.
+The number of tokens to claim is limited by the transaction gas limit, so a list of tokens `tokens` is chosen by the caller with up to the `token_claim_limit` tokens.
+
+Input Parameters:
+`reward_to : address` the address to which the reward will be sent;
+`tokens : token_type list` the tokens to be claimed;
+`deadline : timestamp` transaction deadline;
+
+**Important: If a token was chosen that has no exchange with SMAK token, the operation will fail as this token cannot be swapped to SMAK in order to burn!**
 
 ```mermaid
 flowchart TD
@@ -444,3 +500,85 @@ E-->|swaped smak|tokens
 F-->|tokens to burn|G
 F-->|reward|H
 ```
+
+### Deposit:
+This entrypoint is called by the exchange's `swap` entrypoint, and is used to deposit platform fees to the `burn` and `reserve` big_maps.
+
+### Administrations entrypoints:
+The administration entrypoints can only be accessed by the factory.
+#### Add exchange:
+This entrypoint is used to add a newly launched exchange, and configure the tokens used by it.
+
+#### Remove exchange:
+This entrypoint is used to remove an exchange from the `exchanges` big_map, in case this exchange was removed from the factory.
+
+#### Update claim limit:
+This entrypoint is used to update the maximum number of tokens to be claimed.
+
+
+## Multisig:
+The multisig contract is used to control the factory's administration entrypoints.
+All entrypoints except the `call` entrypoint are being controlled by the multisig and are sent as callbacks to the `call` entrypoint.
+
+### Call:
+This entrypoint is the main entrypoint of the multisig contract.
+It accepts entrypoint signatures and callback functions from the entrypoint calling it, and activates the callback once the `threshold` is reached.
+Several conditions must be met to authenticate the operation of this entrypoint:
+- The `sender` of the call has to be one of the multisig's `authorized_contracts`.
+- The `sender` of the call has to be the `source_contract` stated by the `entrypoint_signature`.
+- The `source` of the call has to be one of the multisig's `admins`.
+
+Input Parameters:
+```
+entrypoint_signature : 
+{
+    name : string;
+    params : bytes;
+    source_contract : address;
+}
+```
+`callback : unit -> operation list;` the callback function activated when `threshold` is reached.
+
+### Administration Entrypoints:
+
+#### Add authorized contract:
+This entrypoint is used to add a contract to the `authorized_contracts` set.
+
+Input parameter:
+`address` the new contract to be added.
+
+#### Remove authorized contract:
+This entrypoint is used to remove a contract from the `authorized_contracts` set.
+
+Input parameter:
+`address` the contract to be removed.
+
+#### Add admin:
+This entrypoint is used to add an admin to the `admins` set.
+
+Input parameter:
+`address` the address of the added admin.
+
+#### Remove admin:
+This entrypoint is used to remove an admin from the `admins` set.
+When removing an admin two conditions have to be met:
+- The number of admins cannot be zero.
+- The number of admins cannot be lower than the `threshold` of the multisig.
+
+Input parameter:
+`address` the address of the removed admin.
+
+#### Set threshold:
+This entrypoint is used to set a new `threshold` for the multisig.
+When setting a new threshold, two conditions have to be met:
+- The threshold cannot be zero.
+- The threshold cannot be higher than the number of admins in the `admins` set.
+
+Input parameter:
+`nat` The value of the new threshold.
+
+#### Set duration:
+This entrypoint is used to set a new duration for calls. If this duration is passed, a call will be restarted, requiring admins to vote again.
+
+Input parameter:
+`nat` the new duration (in seconds).

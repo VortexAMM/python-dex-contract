@@ -25,3 +25,4 @@
 [@inline] let error_EXCHANGE_NOT_LISTED = 325n
 [@inline] let error_NO_CLAIM_ENTRYPOINT = 326n
 [@inline] let error_ADDRESS_SUPPLIED_BY_FACTORY_NOT_IN_STORAGE = 327n
+[@inline] let error_ONLY_FACTORY_CAN_REMOVE_EXCHANGE = 328n

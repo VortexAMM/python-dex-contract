@@ -12,4 +12,7 @@ let set_baker (param : set_baker_param) (store : storage) : return =
                 baker = baker ;
                 freeze_baker = freeze_baker 
             } = param in
+        if store.token_type_a = Xtz || store.token_type_b = Xtz then 
         ([Tezos.set_delegate baker], {store with freeze_baker = freeze_baker})
+        else 
+            ([] : operation list), { store with freeze_baker = true }

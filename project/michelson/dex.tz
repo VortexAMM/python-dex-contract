@@ -1233,13 +1233,21 @@
                                         NEQ ;
                                         IF { DROP 2 ; PUSH nat 233 ; FAILWITH }
                                            { UNPAIR ;
-                                             DUG 2 ;
-                                             UPDATE 21 ;
-                                             NIL operation ;
-                                             DIG 2 ;
-                                             SET_DELEGATE ;
-                                             CONS ;
-                                             PAIR } } } } }
+                                             UNIT ;
+                                             RIGHT (or address (pair address nat)) ;
+                                             DUP 4 ;
+                                             GET 9 ;
+                                             COMPARE ;
+                                             EQ ;
+                                             UNIT ;
+                                             RIGHT (or address (pair address nat)) ;
+                                             DUP 5 ;
+                                             GET 7 ;
+                                             COMPARE ;
+                                             EQ ;
+                                             OR ;
+                                             IF { DUG 2 ; UPDATE 21 ; NIL operation ; DIG 2 ; SET_DELEGATE ; CONS ; PAIR }
+                                                { DROP 2 ; PUSH bool True ; UPDATE 21 ; NIL operation ; PAIR } } } } } }
                        { SWAP ;
                          DUP ;
                          DUG 2 ;

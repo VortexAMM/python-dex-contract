@@ -12,4 +12,4 @@ let set_baker (param : set_baker_param) (store : storage) : return =
                 baker = baker ;
                 freeze_baker = freeze_baker 
             } = param in
-        ([ Tezos.set_delegate baker ], {store with freeze_baker = freeze_baker})
+        ([Tezos.set_delegate baker], {store with freeze_baker = freeze_baker})

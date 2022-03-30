@@ -1,5 +1,6 @@
 #if !COMMON_INTERFACE
 #define COMMON_INTERFACE
+[@inline] let voting_period = 2592000
 
 type token_id = nat
 
@@ -13,7 +14,7 @@ type fa_token =
 | FA12 of address
 
 type token_amount =
-| Mutez
+| Mutez of nat
 | Amount of nat
 
 type curve_type =
@@ -26,6 +27,20 @@ type fa12_contract_transfer =
     [@annot:from] address_from : address;
     [@annot:to] address_to : address;
     value : nat; 
+}
+
+type entrypoint_signature =
+{
+    name : string;
+    params : bytes;
+    source_contract : address;
+}
+
+type call_param =
+[@layout:comb]
+{
+    entrypoint_signature : entrypoint_signature;
+    callback : unit -> operation list;
 }
 
 type tokens = (address, nat) big_map
@@ -86,26 +101,13 @@ type fa2_update_token_pool_internal = ((address * nat) * nat) list
 
 type fa12_update_token_pool_internal = nat
 
+type exchanges = ((token_type * token_type), address) big_map
+
 type mint_or_burn = 
 [@layout:comb]
 {
     quantity : int; 
     target : address
-}
-
-type baker_rewards_provider_data =
-[@layout:comb]
-{
-    counter : nat;
-    lqt_shares : nat;
-    accumulated : tez;
-}
-
-type baker_rewards_history =
-[@layout:comb]
-{
-    total_lqt : nat;
-    total_fees : tez;
 }
 
 type lp_token_storage = 
@@ -119,14 +121,13 @@ type lp_token_storage =
   token_metadata: (nat, token_metadata_entry) big_map 
 }
 
-type baker_rewards_storage =
+
+(* record that represents account baker rewards info *)
+type user_reward_info = 
 [@layout:comb]
 {
-    providers : (address, baker_rewards_provider_data) big_map;
-    total_lp_tokens : nat;
-    dex_address : address;
-    lqt_history : (nat , baker_rewards_history) big_map;
-    counter : nat;
+  reward        : nat; (* collected rewards *)
+  reward_paid   : nat; (* last reward accumulator calculated as user_loyalty * reward_per_loyalty *)
 }
 
 type sink_storage = 
@@ -138,7 +139,7 @@ type sink_storage =
     reserve : (token_type, nat) big_map;
     reserve_address : address;
     token_claim_limit : nat;
-    exchanges : ((token_type * token_type), address) big_map
+    exchanges : exchanges;
 }
 
 type dex_storage =
@@ -150,15 +151,21 @@ type dex_storage =
     token_type_a : token_type;
     token_type_b : token_type;
     token_type_smak : token_type;
-    reserve : address;
     lqt_address : address option;
     lqt_total : nat;
     curve : curve_type;
     manager : address;
     freeze_baker : bool;
     sink : address;
-    baker_rewards : address option;
-    reward_rate : nat;
+    sink_reward_rate : nat;
+    reward : nat; 
+    total_reward : nat; 
+    reward_paid : nat; 
+    reward_per_share : nat; 
+    reward_per_sec : nat; 
+    last_update_time : timestamp; 
+    period_finish : timestamp;
+    user_rewards : (address, user_reward_info) big_map; 
 }
 
 type get_dex_address_param =
@@ -184,6 +191,8 @@ type dex_set_baker_param =
     baker : key_hash option;
     freeze_baker : bool;
 }
+
+
 
 type sink_burn_param = 
 [@layout:comb]
@@ -212,15 +221,15 @@ type sink_add_exchange_param =
   token_a : token_type;
   token_b : token_type;
 }
-
-type baker_rewards_add_lqt =
+type sink_remove_exchange_param =
 [@layout:comb]
 {
-  lqt_minted : nat;
-  owner : address;
+  token_a : token_type;
+  token_b : token_type;
+  dex_address : address;
 }
 
-type baker_rewards_remove_lqt = nat
+
 
 [@inline]
 let null_implicit_account = ("tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU" : address)

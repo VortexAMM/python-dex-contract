@@ -230,5 +230,9 @@
                       SWAP ;
                       UPDATE 3 ;
                       NIL operation ;
-                      PAIR } } } } }
+                      PAIR } } } } ;
+  view "balance_of_view"
+       address
+       nat
+       { UNPAIR ; SWAP ; CAR ; SWAP ; GET ; IF_NONE { PUSH nat 0 } {} } }
 

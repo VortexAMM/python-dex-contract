@@ -13,8 +13,13 @@ BOB_PK = "tz1RTrkJszz7MgNdeEvRLaek8CCrcvhTZTsg"
 BOB_KEY = "edsk4YDWx5QixxHtEfp5gKuYDd1AZLFqQhmquFgz64mDXghYYzW6T9"
 CHARLIE_KEY = "edsk3G87qnDZhR74qYDFAC6nE17XxWkvPJtWpLw4vfeZ3otEWwwskV"
 CHARLIE_PK = "tz1iYCR11SMJcpAH3egtDjZRQgLgKX6agU7s"
-# SHELL = "https://exanode.exaion.com/v1/b24137df-b8cc-46e6-b4da-49d65294e0a6/rpc/"
 SHELL = "http://localhost:20000"
+
+# hangzhounet
+# DEFAULT_BAKER = "tz1MeT8NACB8Q4uV9dPQ3YxXBmYgapbxQxQ5"
+
+# sandbox
+DEFAULT_BAKER = ALICE_PK
 
 _using_params = dict(shell=SHELL, key=ALICE_KEY)
 bob_using_params = dict(shell=SHELL, key=BOB_KEY)
@@ -25,6 +30,20 @@ bob_pytezos = pytezos.using(**bob_using_params)
 charlie_pytezos = pytezos.using(**charlie_using_params)
 
 send_conf = dict(min_confirmations=1)
+
+metadata = {
+    "name": "",
+    "version": "",
+    "homepage": "",
+    "authors": [""],
+}
+token_metadata = {
+    "uri": "",
+    "symbol": "",
+    "decimals": "",
+    "shouldPreferSymbol": "",
+    "thumbnailUri": "",
+}
 
 
 @dataclass
@@ -50,6 +69,12 @@ class FA2Storage:
 
 
 @dataclass
+class MultisigStorage:
+    admins: str = ALICE_PK
+    authorized_contracts: str = ALICE_PK
+
+
+@dataclass
 class FactoryStorage:
     pairs: dict = field(default_factory=dict)
     pools: dict = field(default_factory=dict)
@@ -62,9 +87,10 @@ class FactoryStorage:
     default_lp_token_metadata: dict = field(default_factory=dict)
     counter: int = 0
     default_reward_rate: int = 300
-    default_baker: str = ALICE_PK
+    default_baker: str = DEFAULT_BAKER
     default_claim_limit: int = 100
-    admin: str = ALICE_PK
+    multisig: str = ALICE_PK
+    default_user_rewards: int = 0
 
 
 @dataclass
@@ -164,6 +190,26 @@ class Env:
 
         return fa12
 
+    def deploy_multisig(self, init_storage: MultisigStorage()):
+        with open("../michelson/multisig.tz", encoding="UTF-8") as file:
+            source = file.read()
+        multisig = ContractInterface.from_michelson(
+            source).using(**self.using_params)
+        storage = {
+            "admins": {init_storage.admins},
+            "n_calls": {},
+            "threshold": 1,
+            "duration": 3600,
+            "authorized_contracts": {init_storage.authorized_contracts},
+        }
+        opg = multisig.originate(initial_storage=storage).send(**send_conf)
+        multisig_address = OperationResult.from_operation_group(
+            opg.opg_result)[0].originated_contracts[0]
+        multisig = pytezos.using(
+            **self.using_params).contract(multisig_address)
+
+        return multisig
+
     def deploy_liquidity_token(self, init_storage: LqtStorage):
         with open("../michelson/lqt_fa12.tz", encoding="UTF-8") as file:
             source = file.read()
@@ -214,6 +260,7 @@ class Env:
 
         factory = ContractInterface.from_michelson(
             source).using(**self.using_params)
+
         storage = {
             "pairs": init_storage.pairs,
             "pools": init_storage.pools,
@@ -227,7 +274,8 @@ class Env:
             "counter": init_storage.counter,
             "default_baker": init_storage.default_baker,
             "default_claim_limit": init_storage.default_claim_limit,
-            "admin": init_storage.admin,
+            "multisig": init_storage.multisig,
+            "default_user_rewards": init_storage.default_user_rewards,
         }
 
         opg = factory.originate(initial_storage=storage).send(**send_conf)
@@ -235,6 +283,10 @@ class Env:
             0
         ].originated_contracts[0]
         factory = pytezos.using(**self.using_params).contract(factory_addr)
+        multisig_init_storage = MultisigStorage()
+        multisig_init_storage.authorized_contracts = factory_addr
+        multisig = self.deploy_multisig(multisig_init_storage)
+        factory.updateMultisig(multisig.address).send(**send_conf)
 
         return factory
 
@@ -249,19 +301,13 @@ class Env:
         factory.launchSink().send(**send_conf)
         sink = pytezos.using(
             **self.using_params).contract(factory.storage["default_sink"]())
+        multisig = pytezos.using(
+            **self.using_params).contract(factory.storage["multisig"]())
 
-        return factory, smak_token, sink
+        return factory, smak_token, sink, multisig
 
     def deploy_app_with_all_pairs(self):
-        factory, smak_token, sink = self.deploy_full_app()
-        factory_address = factory.address
-        with open('../../real_contracts.txt', 'a') as f:
-            f.write(
-                f'factory address : {factory_address}; \n')
-        sink_address = sink.address
-        with open('../../real_contracts.txt', 'a') as f:
-            f.write(
-                f'sink address : {sink_address}; \n')
+        factory, smak_token, sink, multisig = self.deploy_full_app()
         pairs = []
         # pair0 fa12 -> fa12
         pair0_token_a = self.deploy_fa12(FA12Storage())
@@ -397,15 +443,13 @@ class Env:
                 pytezos.contract(token_b_address).update_operators([{"add_operator": {
                     "owner": ALICE_PK, "operator": factory.address, "token_id": 0}}]).send(**send_conf)
 
-            token_amount_a = {"mutez": None} if token_a == {
+            token_amount_a = {"mutez": 10 ** 10} if token_a == {
                 "xtz": None} else {"amount": 10 ** 10}
-            token_amount_b = {"mutez": None} if token_b == {
+            token_amount_b = {"mutez": 10 ** 10} if token_b == {
                 "xtz": None} else {"amount": 10 ** 10}
 
             amount_to_send = 10 ** 10 if token_a == {
                 "xtz": None} or token_b == {"xtz": None} else 0
-
-            liquidity_token = self.deploy_liquidity_token(LqtStorage())
 
             launch_exchange_params = {
                 "token_type_a": token_a,
@@ -413,19 +457,12 @@ class Env:
                 "token_amount_a": token_amount_a,
                 "token_amount_b": token_amount_b,
                 "curve": {"flat": None},
-                "lp_address": liquidity_token.address,
+                "metadata": metadata,
+                "token_metadata": token_metadata
             }
 
-            opg = factory.launchExchange(launch_exchange_params).with_amount(
+            factory.launchExchange(launch_exchange_params).with_amount(
                 amount_to_send).send(**send_conf)
-            dex_address = factory.storage["pairs"][(token_a, token_b)]()
-            lqt_address = liquidity_token.address
-            with open('../../real_contracts.txt', 'a') as f:
-                f.write(
-                    f'dex address : {dex_address}; \n')
-            with open('../../real_contracts.txt', 'a') as f:
-                f.write(
-                    f'liquidity token address : {lqt_address}; \n')
 
         return factory, smak_token, sink
 
@@ -452,11 +489,8 @@ class TestEnv(unittest.TestCase):
         lqt = Env().deploy_liquidity_token(init_storage)
 
     def test_deploy_full_app(self):
-        factory, smak_token, sink = Env().deploy_full_app()
+        factory, smak_token, sink, multisig = Env().deploy_full_app()
         self.assertEqual(factory.storage["default_smak_token_type"](), {
                          "fa12": smak_token.address})
         self.assertEqual(factory.storage["default_sink"](), sink.address)
         self.assertEqual(sink.storage["factory_address"](), factory.address)
-
-    def test_deploy_app_with_all_pairs(self):
-        factory, smak_token, sink = Env().deploy_app_with_all_pairs()

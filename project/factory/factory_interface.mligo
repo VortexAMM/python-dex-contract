@@ -13,12 +13,32 @@ type storage =
     default_lp_token_metadata: (nat, token_metadata_entry) big_map ;
     default_baker : key_hash;
     default_reward_rate : nat;
-    counter : nat;
     default_claim_limit : nat;
-    admin : address;
+    default_user_rewards: (address, user_reward_info) big_map; 
+    counter : nat;
+    multisig : address;
 }
 
 type return = operation list * storage
+
+type metadata =
+[@layout:comb]
+{
+  name : string;
+  version : string;
+  homepage : string;
+  authors : string list;
+}
+
+type token_metadata =
+[@layout:comb]
+{
+  uri : string;
+  symbol : string;
+  decimals : string;
+  shouldPreferSymbol : string;
+  thumbnailUri : string;
+}
 
 type launch_exchange_params =
 [@layout:comb]
@@ -28,7 +48,16 @@ type launch_exchange_params =
     token_amount_a : token_amount;
     token_amount_b : token_amount;
     curve : curve_type;
-    lp_address : address;
+    metadata : metadata;
+    token_metadata : token_metadata;
+}
+
+type remove_exchange_param =
+[@layout:comb]
+{
+  index : nat;
+  token_a : token_type;
+  token_b : token_type;
 }
 
 type set_lqt_address_params =
@@ -53,10 +82,29 @@ type set_baker_param =
   freeze_baker : bool;
 }
 
+type update_baker_param =
+[@layout:comb]
+{
+  baker : key_hash;
+  first_pool : nat;
+  number_of_pools : nat;
+}
+
+type update_sink_address_param =
+[@layout:comb]
+{
+  number_of_pools : nat;
+  first_pool : nat;
+  new_sink_address : address;
+}
+
 type parameter =
 | LaunchExchange of launch_exchange_params
 | SetLqtAddress of set_lqt_address_params
-| SetRewardsAddress of set_rewards_address_param
 | LaunchSink
 | SetBaker of set_baker_param
 | SetSinkClaimLimit of nat
+| UpdateSinkAddress of update_sink_address_param
+| RemoveExchange of remove_exchange_param
+| UpdateBaker of update_baker_param
+| UpdateMultisig of address

@@ -1,6 +1,13 @@
 let set_sink_claim_limit (param : nat) (store : storage) : return =
-    if Tezos.sender <> store.admin then
-        (failwith(error_ONLY_ADMIN_CAN_SET_CLAIM_LIMIT) : return)
+    if Tezos.sender <> store.multisig then
+      let sender_address = Tezos.self_address in
+      let func () =
+        match (Tezos.get_entrypoint_opt "%setClaimLimit" sender_address : nat contract option) with
+          | None -> (failwith("no setClaimLimit entrypoint") : operation list)
+          | Some set_claim_limit_entrypoint ->
+            [Tezos.transaction param 0mutez set_claim_limit_entrypoint]
+        in
+        (prepare_multisig "setClaimLimit" param func store), store
     else
         let sink_address =
             match store.default_sink with

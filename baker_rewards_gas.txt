@@ -54,3 +54,5 @@ number of deposits : 50; 4260 gas;
 
 for each liquidity provider an additional 845 gas was cosumed.
 this puts a limit to aproximately 1200 liquidity providers per DEX contract.
+
+

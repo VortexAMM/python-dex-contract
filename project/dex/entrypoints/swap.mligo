@@ -83,7 +83,7 @@ let swap (param : swap_param) (store : storage) : return =
             in
         let ops_token_out_transfer = 
             if Tezos.sender = store.sink && out_type = store.token_type_smak then
-                let reward = bought * store.reward_rate / 10_000n in
+                let reward = bought * store.sink_reward_rate / 10_000n in 
                 [
                     make_transfer
                         out_type

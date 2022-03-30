@@ -3,7 +3,6 @@ let launch_exchange(param : launch_exchange_params) (store : storage) : return =
         match store.default_sink with
         | None -> (failwith error_SINK_CONTRACT_HAS_NOT_YET_DEPLOYED : address)
         | Some sink_addr -> sink_addr in
-    let reserve_address = store.default_reserve in
     let token_a = param.token_type_a in
     let token_b = param.token_type_b in
 
@@ -16,9 +15,12 @@ let launch_exchange(param : launch_exchange_params) (store : storage) : return =
     else
         let token_amount_a = 
             match param.token_amount_a with
-            | Mutez -> 
+            | Mutez p -> 
                 if token_a = Xtz then
-                    mutez_to_natural Tezos.amount
+                    if p <> mutez_to_natural Tezos.amount then
+                        (failwith(error_MUTEZ_AMOUNT_SHOULD_BE_EQUAL_TO_AMOUNT_SENT) : nat)
+                    else
+                        p
                 else (failwith(error_NO_XTZ_AMOUNT_TO_BE_SENT) : nat)
             | Amount p ->
                 if token_a <> Xtz then
@@ -28,9 +30,12 @@ let launch_exchange(param : launch_exchange_params) (store : storage) : return =
             in
         let token_amount_b =
             match param.token_amount_b with
-            | Mutez -> 
+            | Mutez p -> 
                 if token_b = Xtz then
-                    mutez_to_natural Tezos.amount
+                    if p <> mutez_to_natural Tezos.amount then
+                        (failwith(error_MUTEZ_AMOUNT_SHOULD_BE_EQUAL_TO_AMOUNT_SENT) : nat)
+                    else
+                        p
                 else (failwith(error_NO_XTZ_AMOUNT_TO_BE_SENT) : nat)
             | Amount p -> 
                 if token_b <> Xtz then
@@ -56,64 +61,69 @@ let launch_exchange(param : launch_exchange_params) (store : storage) : return =
                     token_type_a = param.token_type_a;
                     token_type_b = param.token_type_b;
                     token_type_smak = store.default_smak_token_type;
-                    reserve = reserve_address;
                     lqt_address = (None : address option);
                     lqt_total = initial_lqt_total;
                     curve = param.curve;
                     manager = Tezos.self_address;
                     freeze_baker = false;
                     sink = sink_addr;
-                    baker_rewards = (None : address option);
-                    reward_rate = store.default_reward_rate;
+                    reward = 0n; 
+                    total_reward = 0n; 
+                    reward_paid = 0n; 
+                    reward_per_share = 0n; 
+                    reward_per_sec = 0n; 
+                    last_update_time = Tezos.now; 
+                    period_finish = Tezos.now;
+                    user_rewards = store.default_user_rewards;
+                    sink_reward_rate = store.default_reward_rate;
                 } in
+
                 let (op_deploy_dex, dex_address) = deploy_dex dex_init_storage in
 
                 let ops = op_deploy_dex :: ops in
 
+                let metadata = Big_map.literal [
+                    ("name", Bytes.pack param.metadata.name);
+                    ("version", Bytes.pack param.metadata.version);
+                    ("homepage", Bytes.pack param.metadata.homepage);
+                    ("authors", Bytes.pack param.metadata.authors);
+                    ("interfaces", Bytes.pack ["TZIP-012", "TZIP-021"]);
+                ] in
+
+                let token_info = Map.literal [
+                    ("", Bytes.pack param.token_metadata.uri);
+                    ("name", Bytes.pack param.metadata.name);
+                    ("symbol", Bytes.pack param.token_metadata.symbol);
+                    ("decimals", Bytes.pack param.token_metadata.decimals);
+                    ("shouldPreferSymbol", Bytes.pack param.token_metadata.shouldPreferSymbol);
+                    ("thumbnailUri", Bytes.pack param.token_metadata.thumbnailUri);
+                ] in
+
+                let token_metadata_entry =
+                {
+                    token_id = 0n;
+                    token_info = token_info;
+                } in
+
+                let token_metadata =
+                    Big_map.literal [(0n, token_metadata_entry)] in
+
                 let lp_token_init_storage =
                     {
                         tokens = 
-                            Big_map.update Tezos.sender (Some initial_lqt_total) (Big_map.empty : tokens);
+                            Big_map.literal [(Tezos.sender, initial_lqt_total)];
+                            //Big_map.update Tezos.sender (Some initial_lqt_total) (Big_map.empty : tokens);
                         allowances = store.default_lp_allowances;
                         admin = dex_address;
                         total_supply = initial_lqt_total;
-                        token_metadata = store.default_lp_token_metadata;
-                        metadata = store.default_lp_metadata;
+                        token_metadata = token_metadata;
+                        metadata = metadata;
                     } in
 
                 let (op_deploy_lp_token, lp_token_address) =
                     deploy_lp_token lp_token_init_storage in
 
                 let ops = op_deploy_lp_token :: ops in
-
-                let rewards_provider_data =
-                {
-                    counter = 0n;
-                    lqt_shares = initial_lqt_total;
-                    accumulated = 0mutez;
-                } in
-                let rewards_history =
-                    {
-                        total_lqt = initial_lqt_total;
-                        total_fees = 0mutez;
-                    } in
-
-                let baker_rewards_init_storage =
-                    {
-                        providers = (Big_map.literal [Tezos.sender, rewards_provider_data] : (address, baker_rewards_provider_data) big_map);
-                        total_lp_tokens = initial_lqt_total;
-                        dex_address = dex_address;
-                        lqt_history = (Big_map.literal [0n, rewards_history] : (nat, baker_rewards_history) big_map);
-                        counter = 0n;
-                    } in
-
-                let (op_deploy_baker_rewards, baker_rewards_address) = deploy_baker_rewards baker_rewards_init_storage in
-
-                let ops =
-                    if param.token_type_a = Xtz || param.token_type_b = Xtz then 
-                        op_deploy_baker_rewards :: ops
-                    else
-                        ops in
 
                 let new_store =
                     {
@@ -150,8 +160,7 @@ let launch_exchange(param : launch_exchange_params) (store : storage) : return =
                              set_lqt_address_params contract option)
                     with
                     | None ->
-                      (failwith error_SELF_SET_LQT_ADDRESS_DOES_NOT_EXIST : set_lqt_address_params
-                           contract)
+                      (failwith error_SELF_SET_LQT_ADDRESS_DOES_NOT_EXIST : set_lqt_address_params contract)
                     | Some contract -> contract in
 
                 let set_lqt_address =
@@ -184,21 +193,6 @@ let launch_exchange(param : launch_exchange_params) (store : storage) : return =
 
                 let ops = op_set_baker :: ops in
 
-                let set_rewards_address_entrypoint : set_rewards_address_param contract =
-                    match (Tezos.get_entrypoint_opt "%setRewardsAddress" Tezos.self_address : 
-                             set_rewards_address_param contract option)
-                    with
-                    | None ->
-                      (failwith error_SELF_SET_REWARDS_ADDRESS_DOES_NOT_EXIST : set_rewards_address_param
-                           contract)
-                    | Some contract -> contract in
-
-                let op_set_rewards_address =
-                    Tezos.transaction
-                        { dex_address = dex_address ; rewards_address = baker_rewards_address }
-                        0mutez set_rewards_address_entrypoint in
-
-                let ops = op_set_rewards_address :: ops in
 
                 let sink_add_exchange =
                     match (Tezos.get_entrypoint_opt "%addExchange" sink_addr : sink_add_exchange_param contract option) with

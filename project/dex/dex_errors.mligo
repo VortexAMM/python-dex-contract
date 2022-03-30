@@ -14,11 +14,11 @@
 [@inline] let error_SWAP_DEADLINE_IS_OVER = 214n
 [@inline] let error_TOKENS_BOUGHT_MUST_BE_GREATER_THAN_OR_EQUAL_TO_MIN_TOKENS_BOUGHT = 215n
 [@inline] let error_TOKEN_POOL_MINUS_TOKENS_BOUGHT_IS_NEGATIVE = 216n
-[@inline] let error_A_PROTOCOL_FEE_IS_TOO_BIG = 217n
-[@inline] let error_B_PROTOCOL_FEE_IS_TOO_BIG = 218n
-[@inline] let error_K2_SHOULD_BE_GREATER_THAN_K1 = 219n
+[@inline] let error_INCORRECT_XTZ_AMOUNT_WAS_SENT = 217n
+(* 218n *)
+(* 219n *)
 [@inline] let error_ONLY_MANAGER_CAN_SET_LIQUIDITY_ADDRESS = 220n
-[@inline] let error_LQT_ADDRESS_ALREADY_SET = 221n
+(* 221n *)
 [@inline] let error_NON_EXISTING_ENTRYPOINT2 = 222n
 [@inline] let error_NON_EXISTING_ENTRYPOINT12 = 223n
 [@inline] let error_INVALID_FA2_TOKEN_CONTRACT_MISSING_BALANCE_OF = 224n
@@ -29,16 +29,24 @@
 [@inline] let error_SELF_IS_UPDATING_TOKEN_POOL_MUST_BE_FALSE = 229n
 [@inline] let error_THIS_ENTRYPOINT_MAY_ONLY_BE_CALLED_BY_GETBALANCE_OF_TOKENADDRESS = 230n
 [@inline] let error_NO_AMOUNT_TO_BE_SENT = 231n
-[@inline] let error_ONLY_RESERVE_CAN_UPDATE_RESERVE = 232n
+[@inline] let error_ONLY_MANAGER_CAN_UPDATE_SINK_ADDRESS = 232n
 [@inline] let error_ONLY_MANAGER_CAN_SET_BAKER = 233n
 [@inline] let error_BAKER_PERMANENTLY_FROZEN = 234n
 [@inline] let error_AMOUNT_MUST_BE_ZERO = 235n
-[@inline] let error_NO_XTZ_POOL = 236n
-[@inline] let error_NO_SINK_CONTRACT_EXISTS = 237n
+(* 236n *)
+(* 237n *)
 [@inline] let error_AMOUNT_MUST_BE_SENT = 238n
 [@inline] let error_NO_SINK_DEPOSIT_ENTRYPOINT_EXISTS = 239n
-[@inline] let error_BAKER_REWARDS_ADDRESS_HAS_NO_DEPOSITFEES_ENTRYPOINT = 240n
-[@inline] let error_BAKER_REWARDS_CONTRACT_HAS_NO_ADDLQT_ENTRYPOINT = 241n
-[@inline] let error_BAKER_REWARDS_CONTRACT_HAS_NO_REMOVELQT_ENTRYPOINT = 242n
-[@inline] let error_BAKER_REWARDS_ADDRESS_IS_NOT_SET = 243n
-[@inline] let error_ONLY_MANAGER_CAN_SET_REWARDS_ADDRESS = 244n
+(* 240n *)
+(* 241n *)
+(* 242n *)
+(* 243n *)
+(* 244n *)
+[@inline] let error_REWARDS_TIME_MINUS_LAST_UPDATE_TIME_IS_NEGATIVE = 245n
+[@inline] let error_DELTA_TIME_IS_NEGATIVE = 246n
+[@inline] let error_PERIOD_DURATION_IS_NEGATIVE = 247n
+[@inline] let error_DELTA_REWARD_IS_NEGATIVE = 248n
+[@inline] let error_USER_BALANCE_IS_INSUFFISANT = 249n
+[@inline] let error_REWARD_LARGER_THAN_BALANCE = 250n
+[@inline] let error_NO_REWARDS_FOR_THIS_PAIR = 251n
+[@inline] let error_ONLY_MANAGER_CAN_UPDATE_REWARD_PERIOD = 252n

@@ -1,5 +1,8 @@
+from time import sleep
+
+from math import sqrt
 from test_flat import newton
-from test_env import Env, ALICE_PK, pytezos, FA12Storage, FA2Storage, FactoryStorage, LqtStorage, send_conf, _using_params, BOB_PK
+from test_env import Env, ALICE_PK, pytezos, FA12Storage, FA2Storage, FactoryStorage, LqtStorage, send_conf, _using_params, BOB_PK, bob_pytezos
 from test_factory import Factory
 from unittest import TestCase
 from pytezos.rpc.errors import MichelsonError
@@ -43,6 +46,9 @@ class Dex:
     update_token_pool_param = None
 
 
+accurancy_multiplier = 10 ** 12
+
+
 class TestDex(TestCase):
     @staticmethod
     def print_title(instance):
@@ -59,7 +65,7 @@ class TestDex(TestCase):
         TestDex.print_title(self)
 
     def test01_it_adds_liquidity_successfuly(self):
-        factory, _, _ = Env().deploy_full_app()
+        factory, _, _, _ = Env().deploy_full_app()
         fa12_init_storage = FA12Storage()
         token_a = Env().deploy_fa12(fa12_init_storage)
         token_b = Env().deploy_fa12(fa12_init_storage)
@@ -67,7 +73,6 @@ class TestDex(TestCase):
         launch_exchange_params = Factory.launch_exchange_params
         launch_exchange_params["token_type_a"] = {"fa12": token_a.address}
         launch_exchange_params["token_type_b"] = {"fa12": token_b.address}
-        launch_exchange_params["lp_address"] = liquidity_token.address
         amount_a = 10 ** 6
         amount_b = 10 ** 6
         token_a.mint({"address": ALICE_PK, "value": amount_a}
@@ -115,27 +120,24 @@ class TestDex(TestCase):
         ), add_amount_a + amount_a)
         self.assertEqual(dex.storage["token_pool_b"](
         ), amount_b + add_amount_a * amount_b // amount_a)
-        self.assertEqual(dex.storage["last_k"](
-        ), (add_amount_a + amount_a) * (amount_b + add_amount_a * amount_b // amount_a))
         self.assertEqual(lqt.storage["tokens"][ALICE_PK](
         ), alice_liquidity + add_amount_a * lqt_total // amount_a)
 
     def test_add_liquidity_gas_consumption_with_xtz(self):
-        factory, _, _ = Env().deploy_full_app()
+        factory, _, _, _ = Env().deploy_full_app()
         fa12_init_storage = FA12Storage()
         token_b = Env().deploy_fa12(fa12_init_storage)
         liquidity_token = Env().deploy_liquidity_token(LqtStorage())
         launch_exchange_params = Factory.launch_exchange_params
         launch_exchange_params["token_type_a"] = {"xtz": None}
         launch_exchange_params["token_type_b"] = {"fa12": token_b.address}
-        launch_exchange_params["lp_address"] = liquidity_token.address
         amount_a = 10 ** 6
         amount_b = 10 ** 6
         token_b.mint({"address": ALICE_PK, "value": amount_b}
                      ).send(**send_conf)
         token_b.approve({"spender": factory.address,
                         "value": amount_b}).send(**send_conf)
-        launch_exchange_params["token_amount_a"] = {"mutez": None}
+        launch_exchange_params["token_amount_a"] = {"mutez": amount_a}
         launch_exchange_params["token_amount_b"] = {"amount": amount_b}
         factory.launchExchange(launch_exchange_params).with_amount(
             amount_a).send(**send_conf)
@@ -160,13 +162,19 @@ class TestDex(TestCase):
         add_liquidity_params["deadline"] = pytezos.now() + 100
         opg = dex.addLiquidity(add_liquidity_params).with_amount(
             add_amount_a).send(**send_conf)
+        self.assertEqual(dex.context.get_balance(), amount_a + add_amount_a)
+        self.assertEqual(dex.storage["token_pool_a"]
+                         (), amount_a + add_amount_a)
+        new_liquidity = lqt_total + add_amount_a * lqt_total / amount_a
+        self.assertEqual(dex.storage["lqt_total"](), new_liquidity)
+        self.assertEqual(lqt.storage["tokens"][ALICE_PK](), new_liquidity)
         consumed_gas = OperationResult.consumed_gas(opg.opg_result)
         with open('../../add_liquidity_gas.txt', 'a') as f:
             f.write(
                 f'new add_liquidity with baker_rewards call : {consumed_gas} gas; \n')
 
     def test02_it_fails_when_max_tokens_deposited_is_smaller_than_tokens_deposited(self):
-        factory, _, _ = Env().deploy_full_app()
+        factory, _, _, _ = Env().deploy_full_app()
         fa12_init_storage = FA12Storage()
         token_a = Env().deploy_fa12(fa12_init_storage)
         token_b = Env().deploy_fa12(fa12_init_storage)
@@ -174,7 +182,6 @@ class TestDex(TestCase):
         launch_exchange_params = Factory.launch_exchange_params
         launch_exchange_params["token_type_a"] = {"fa12": token_a.address}
         launch_exchange_params["token_type_b"] = {"fa12": token_b.address}
-        launch_exchange_params["lp_address"] = liquidity_token.address
         amount_a = 10 ** 6
         amount_b = 10 ** 6
         token_a.mint({"address": ALICE_PK, "value": amount_a}
@@ -213,7 +220,7 @@ class TestDex(TestCase):
         self.assertEqual(err.exception.args[0]["with"], {"int": "203"})
 
     def test03_it_fails_when_lqt_minted_is_lesser_than_min_lqt_minted(self):
-        factory, _, _ = Env().deploy_full_app()
+        factory, _, _, _ = Env().deploy_full_app()
         fa12_init_storage = FA12Storage()
         token_a = Env().deploy_fa12(fa12_init_storage)
         token_b = Env().deploy_fa12(fa12_init_storage)
@@ -221,7 +228,6 @@ class TestDex(TestCase):
         launch_exchange_params = Factory.launch_exchange_params
         launch_exchange_params["token_type_a"] = {"fa12": token_a.address}
         launch_exchange_params["token_type_b"] = {"fa12": token_b.address}
-        launch_exchange_params["lp_address"] = liquidity_token.address
         amount_a = 10 ** 6
         amount_b = 10 ** 6
         token_a.mint({"address": ALICE_PK, "value": amount_a}
@@ -260,7 +266,7 @@ class TestDex(TestCase):
         self.assertEqual(err.exception.args[0]["with"], {"int": "204"})
 
     def test10_it_removes_liquidity_successfuly(self):
-        factory, _, _ = Env().deploy_full_app()
+        factory, _, _, _ = Env().deploy_full_app()
         fa12_init_storage = FA12Storage()
         token_a = Env().deploy_fa12(fa12_init_storage)
         token_b = Env().deploy_fa12(fa12_init_storage)
@@ -268,7 +274,6 @@ class TestDex(TestCase):
         launch_exchange_params = Factory.launch_exchange_params
         launch_exchange_params["token_type_a"] = {"fa12": token_a.address}
         launch_exchange_params["token_type_b"] = {"fa12": token_b.address}
-        launch_exchange_params["lp_address"] = liquidity_token.address
         amount_a = 10 ** 6
         amount_b = 10 ** 6
         token_a.mint({"address": ALICE_PK, "value": amount_a}
@@ -301,22 +306,56 @@ class TestDex(TestCase):
             f.write(
                 f'new remove_liquidity with no baker_rewards call : {consumed_gas} gas; \n')
 
-    def test_remove_liquidity_gas_consumption_xtz(self):
-        factory, _, _ = Env().deploy_full_app()
+    def test_remove_liquidity_with_baker_rewards_update(self):
+        factory, _, _, _ = Env().deploy_full_app()
         fa12_init_storage = FA12Storage()
         token_b = Env().deploy_fa12(fa12_init_storage)
         liquidity_token = Env().deploy_liquidity_token(LqtStorage())
         launch_exchange_params = Factory.launch_exchange_params
         launch_exchange_params["token_type_a"] = {"xtz": None}
         launch_exchange_params["token_type_b"] = {"fa12": token_b.address}
-        launch_exchange_params["lp_address"] = liquidity_token.address
         amount_a = 10 ** 6
         amount_b = 10 ** 6
         token_b.mint({"address": ALICE_PK, "value": amount_b}
                      ).send(**send_conf)
         token_b.approve({"spender": factory.address,
                         "value": amount_b}).send(**send_conf)
-        launch_exchange_params["token_amount_a"] = {"mutez": None}
+        launch_exchange_params["token_amount_a"] = {"mutez": amount_a}
+        launch_exchange_params["token_amount_b"] = {"amount": amount_b}
+        factory.launchExchange(launch_exchange_params).with_amount(
+            amount_a).send(**send_conf)
+        dex_address = factory.storage["pairs"][(
+            {"xtz": None}, {"fa12": token_b.address})]()
+        dex = pytezos.contract(dex_address).using(**_using_params)
+        lqt_total = dex.storage["lqt_total"]()
+        remove_amount = 10 ** 6
+        remove_liquidity_params = Dex.remove_liquidity_params
+        remove_liquidity_params["rem_to"] = ALICE_PK
+        remove_liquidity_params["lqt_burned"] = remove_amount
+        remove_liquidity_params["min_token_a_withdrawn"] = remove_amount * \
+            amount_a // lqt_total
+        remove_liquidity_params["min_token_b_withdrawn"] = remove_amount * \
+            amount_b // lqt_total
+        remove_liquidity_params["deadline"] = pytezos.now() + 100
+        dex.removeLiquidity(remove_liquidity_params).send(**send_conf)
+        self.assertEqual(dex.storage["user_rewards"][ALICE_PK](), {
+                         'reward': 0, 'reward_paid': 0})
+
+    def test_remove_liquidity_gas_consumption_xtz(self):
+        factory, _, _, _ = Env().deploy_full_app()
+        fa12_init_storage = FA12Storage()
+        token_b = Env().deploy_fa12(fa12_init_storage)
+        liquidity_token = Env().deploy_liquidity_token(LqtStorage())
+        launch_exchange_params = Factory.launch_exchange_params
+        launch_exchange_params["token_type_a"] = {"xtz": None}
+        launch_exchange_params["token_type_b"] = {"fa12": token_b.address}
+        amount_a = 10 ** 6
+        amount_b = 10 ** 6
+        token_b.mint({"address": ALICE_PK, "value": amount_b}
+                     ).send(**send_conf)
+        token_b.approve({"spender": factory.address,
+                        "value": amount_b}).send(**send_conf)
+        launch_exchange_params["token_amount_a"] = {"mutez": amount_a}
         launch_exchange_params["token_amount_b"] = {"amount": amount_b}
         factory.launchExchange(launch_exchange_params).with_amount(
             amount_a).send(**send_conf)
@@ -340,7 +379,7 @@ class TestDex(TestCase):
                 f'new remove_liquidity with baker_rewards call : {consumed_gas} gas; \n')
 
     def test11_it_fails_when_token_a_withdrawn_is_lesser_than_min_tokens_withdrawn(self):
-        factory, _, _ = Env().deploy_full_app()
+        factory, _, _, _ = Env().deploy_full_app()
         fa12_init_storage = FA12Storage()
         token_a = Env().deploy_fa12(fa12_init_storage)
         token_b = Env().deploy_fa12(fa12_init_storage)
@@ -348,7 +387,6 @@ class TestDex(TestCase):
         launch_exchange_params = Factory.launch_exchange_params
         launch_exchange_params["token_type_a"] = {"fa12": token_a.address}
         launch_exchange_params["token_type_b"] = {"fa12": token_b.address}
-        launch_exchange_params["lp_address"] = liquidity_token.address
         amount_a = 10 ** 6
         amount_b = 10 ** 6
         token_a.mint({"address": ALICE_PK, "value": amount_a}
@@ -380,7 +418,7 @@ class TestDex(TestCase):
         self.assertEqual(err.exception.args[0]["with"], {"int": "211"})
 
     def test12_it_fails_when_token_b_withdrawn_is_lesser_than_min_tokens_withdrawn(self):
-        factory, _, _ = Env().deploy_full_app()
+        factory, _, _, _ = Env().deploy_full_app()
         fa12_init_storage = FA12Storage()
         token_a = Env().deploy_fa12(fa12_init_storage)
         token_b = Env().deploy_fa12(fa12_init_storage)
@@ -388,7 +426,6 @@ class TestDex(TestCase):
         launch_exchange_params = Factory.launch_exchange_params
         launch_exchange_params["token_type_a"] = {"fa12": token_a.address}
         launch_exchange_params["token_type_b"] = {"fa12": token_b.address}
-        launch_exchange_params["lp_address"] = liquidity_token.address
         amount_a = 10 ** 6
         amount_b = 10 ** 6
         token_a.mint({"address": ALICE_PK, "value": amount_a}
@@ -420,7 +457,7 @@ class TestDex(TestCase):
         self.assertEqual(err.exception.args[0]["with"], {"int": "211"})
 
     def test13_it_fails_when_burn_amount_is_greater_than_the_total_lqt(self):
-        factory, _, _ = Env().deploy_full_app()
+        factory, _, _, _ = Env().deploy_full_app()
         fa12_init_storage = FA12Storage()
         token_a = Env().deploy_fa12(fa12_init_storage)
         token_b = Env().deploy_fa12(fa12_init_storage)
@@ -428,7 +465,6 @@ class TestDex(TestCase):
         launch_exchange_params = Factory.launch_exchange_params
         launch_exchange_params["token_type_a"] = {"fa12": token_a.address}
         launch_exchange_params["token_type_b"] = {"fa12": token_b.address}
-        launch_exchange_params["lp_address"] = liquidity_token.address
         amount_a = 10 ** 6
         amount_b = 10 ** 6
         token_a.mint({"address": ALICE_PK, "value": amount_a}
@@ -460,14 +496,13 @@ class TestDex(TestCase):
         self.assertEqual(err.exception.args[0]["with"], {"int": "212"})
 
     def test20_it_swaps_successfully_fa12_xtz(self):
-        factory, _, sink = Env().deploy_full_app()
+        factory, _, sink, _ = Env().deploy_full_app()
         fa12_init_storage = FA12Storage()
         token_a = Env().deploy_fa12(fa12_init_storage)
         liquidity_token = Env().deploy_liquidity_token(LqtStorage())
         launch_exchange_params = Factory.launch_exchange_params
         launch_exchange_params["token_type_a"] = {"fa12": token_a.address}
         launch_exchange_params["token_type_b"] = {"xtz": None}
-        launch_exchange_params["lp_address"] = liquidity_token.address
         amount_a = 10 ** 6
         amount_b = 10 ** 6
         token_a.mint({"address": ALICE_PK, "value": amount_a}
@@ -475,7 +510,7 @@ class TestDex(TestCase):
         token_a.approve({"spender": factory.address,
                         "value": amount_a}).send(**send_conf)
         launch_exchange_params["token_amount_a"] = {"amount": amount_a}
-        launch_exchange_params["token_amount_b"] = {"mutez": None}
+        launch_exchange_params["token_amount_b"] = {"mutez": amount_b}
         factory.launchExchange(launch_exchange_params).with_amount(
             amount_b).send(**send_conf)
         dex_address = factory.storage["pairs"][(
@@ -530,21 +565,20 @@ class TestDex(TestCase):
         ), amount_a + tokens_sold - (burn_amount + reserve_amount))
 
     def test21_it_swaps_successfully_xtz_fa12(self):
-        factory, _, sink = Env().deploy_full_app()
+        factory, _, sink, _ = Env().deploy_full_app()
         fa12_init_storage = FA12Storage()
         token_b = Env().deploy_fa12(fa12_init_storage)
         liquidity_token = Env().deploy_liquidity_token(LqtStorage())
         launch_exchange_params = Factory.launch_exchange_params
         launch_exchange_params["token_type_a"] = {"xtz": None}
         launch_exchange_params["token_type_b"] = {"fa12": token_b.address}
-        launch_exchange_params["lp_address"] = liquidity_token.address
         amount_a = 10 ** 6
         amount_b = 10 ** 6
         token_b.mint({"address": ALICE_PK, "value": amount_a}
                      ).send(**send_conf)
         token_b.approve({"spender": factory.address,
                         "value": amount_a}).send(**send_conf)
-        launch_exchange_params["token_amount_a"] = {"mutez": None}
+        launch_exchange_params["token_amount_a"] = {"mutez": amount_a}
         launch_exchange_params["token_amount_b"] = {"amount": amount_a}
         factory.launchExchange(launch_exchange_params).with_amount(
             amount_a).send(**send_conf)
@@ -597,14 +631,13 @@ class TestDex(TestCase):
         ), amount_b - bought)
 
     def test22_it_swaps_successfully_fa2_xtz(self):
-        factory, _, sink = Env().deploy_full_app()
+        factory, _, sink, _ = Env().deploy_full_app()
         fa2_init_storage = FA2Storage()
         token_a = Env().deploy_fa2(fa2_init_storage)
         liquidity_token = Env().deploy_liquidity_token(LqtStorage())
         launch_exchange_params = Factory.launch_exchange_params
         launch_exchange_params["token_type_a"] = {"fa2": (token_a.address, 0)}
         launch_exchange_params["token_type_b"] = {"xtz": None}
-        launch_exchange_params["lp_address"] = liquidity_token.address
         amount_a = 10 ** 6
         amount_b = 10 ** 6
         token_a.mint({"address": ALICE_PK, "amount": amount_a,
@@ -612,7 +645,7 @@ class TestDex(TestCase):
         token_a.update_operators([{"add_operator": {
             "owner": ALICE_PK, "operator": factory.address, "token_id": 0}}]).send(**send_conf)
         launch_exchange_params["token_amount_a"] = {"amount": amount_a}
-        launch_exchange_params["token_amount_b"] = {"mutez": None}
+        launch_exchange_params["token_amount_b"] = {"mutez": amount_b}
         factory.launchExchange(launch_exchange_params).with_amount(
             amount_b).send(**send_conf)
         dex_address = factory.storage["pairs"][(
@@ -667,21 +700,20 @@ class TestDex(TestCase):
         ), amount_a + tokens_sold - (burn_amount + reserve_amount))
 
     def test23_it_swaps_successfully_xtz_fa2(self):
-        factory, _, sink = Env().deploy_full_app()
+        factory, _, sink, _ = Env().deploy_full_app()
         fa2_init_storage = FA2Storage()
         token_b = Env().deploy_fa2(fa2_init_storage)
         liquidity_token = Env().deploy_liquidity_token(LqtStorage())
         launch_exchange_params = Factory.launch_exchange_params
         launch_exchange_params["token_type_a"] = {"xtz": None}
         launch_exchange_params["token_type_b"] = {"fa2": (token_b.address, 0)}
-        launch_exchange_params["lp_address"] = liquidity_token.address
         amount_a = 10 ** 6
         amount_b = 10 ** 6
         token_b.mint({"address": ALICE_PK, "amount": amount_b,
                       "metadata": {}, "token_id": 0}).send(**send_conf)
         token_b.update_operators([{"add_operator": {
             "owner": ALICE_PK, "operator": factory.address, "token_id": 0}}]).send(**send_conf)
-        launch_exchange_params["token_amount_a"] = {"mutez": None}
+        launch_exchange_params["token_amount_a"] = {"mutez": amount_a}
         launch_exchange_params["token_amount_b"] = {"amount": amount_b}
         factory.launchExchange(launch_exchange_params).with_amount(
             amount_a).send(**send_conf)
@@ -738,7 +770,7 @@ class TestDex(TestCase):
         ), amount_b - bought)
 
     def test24_it_swaps_successfully_fa12_fa2(self):
-        factory, _, sink = Env().deploy_full_app()
+        factory, _, sink, _ = Env().deploy_full_app()
         fa2_init_storage = FA2Storage()
         token_a = Env().deploy_fa12(FA12Storage())
         token_b = Env().deploy_fa2(fa2_init_storage)
@@ -746,7 +778,6 @@ class TestDex(TestCase):
         launch_exchange_params = Factory.launch_exchange_params
         launch_exchange_params["token_type_a"] = {"fa12": token_a.address}
         launch_exchange_params["token_type_b"] = {"fa2": (token_b.address, 0)}
-        launch_exchange_params["lp_address"] = liquidity_token.address
         amount_a = 10 ** 6
         amount_b = 10 ** 6
         token_a.mint({"address": ALICE_PK, "value": amount_a}
@@ -805,14 +836,13 @@ class TestDex(TestCase):
         ), amount_b - bought)
 
     def test25_it_swaps_successfully_fa2_fa12(self):
-        factory, _, sink = Env().deploy_full_app()
+        factory, _, sink, _ = Env().deploy_full_app()
         token_a = Env().deploy_fa2(FA2Storage())
         token_b = Env().deploy_fa12(FA12Storage())
         liquidity_token = Env().deploy_liquidity_token(LqtStorage())
         launch_exchange_params = Factory.launch_exchange_params
         launch_exchange_params["token_type_a"] = {"fa2": (token_a.address, 0)}
         launch_exchange_params["token_type_b"] = {"fa12": token_b.address}
-        launch_exchange_params["lp_address"] = liquidity_token.address
         amount_a = 10 ** 6
         amount_b = 10 ** 6
         token_a.mint({"address": ALICE_PK, "amount": amount_a,
@@ -871,14 +901,13 @@ class TestDex(TestCase):
         ), amount_b - bought)
 
     def test26_it_swaps_successfully_fa12_fa12(self):
-        factory, _, sink = Env().deploy_full_app()
+        factory, _, sink, _ = Env().deploy_full_app()
         token_a = Env().deploy_fa12(FA12Storage())
         token_b = Env().deploy_fa12(FA12Storage())
         liquidity_token = Env().deploy_liquidity_token(LqtStorage())
         launch_exchange_params = Factory.launch_exchange_params
         launch_exchange_params["token_type_a"] = {"fa12": token_a.address}
         launch_exchange_params["token_type_b"] = {"fa12": token_b.address}
-        launch_exchange_params["lp_address"] = liquidity_token.address
         amount_a = 10 ** 6
         amount_b = 10 ** 6
         token_a.mint({"address": ALICE_PK, "value": amount_a}
@@ -937,14 +966,13 @@ class TestDex(TestCase):
         ), amount_b - bought)
 
     def test27_it_swaps_successfully_fa2_fa2(self):
-        factory, _, sink = Env().deploy_full_app()
+        factory, _, sink, _ = Env().deploy_full_app()
         token_a = Env().deploy_fa2(FA2Storage())
         token_b = Env().deploy_fa2(FA2Storage())
         liquidity_token = Env().deploy_liquidity_token(LqtStorage())
         launch_exchange_params = Factory.launch_exchange_params
         launch_exchange_params["token_type_a"] = {"fa2": (token_a.address, 0)}
         launch_exchange_params["token_type_b"] = {"fa2": (token_b.address, 0)}
-        launch_exchange_params["lp_address"] = liquidity_token.address
         amount_a = 10 ** 6
         amount_b = 10 ** 6
         token_a.mint({"address": ALICE_PK, "amount": amount_a,
@@ -1003,7 +1031,7 @@ class TestDex(TestCase):
         ), amount_b - bought)
 
     def test28_it_swaps_successfully_fa12_fa12_flat(self):
-        factory, _, sink = Env().deploy_full_app()
+        factory, _, sink, _ = Env().deploy_full_app()
         token_a = Env().deploy_fa12(FA12Storage())
         token_b = Env().deploy_fa12(FA12Storage())
         liquidity_token = Env().deploy_liquidity_token(LqtStorage())
@@ -1011,7 +1039,6 @@ class TestDex(TestCase):
         launch_exchange_params["token_type_a"] = {"fa12": token_a.address}
         launch_exchange_params["token_type_b"] = {"fa12": token_b.address}
         launch_exchange_params["curve"] = {"flat": None}
-        launch_exchange_params["lp_address"] = liquidity_token.address
         amount_a = 10 ** 6
         amount_b = 10 ** 6
         token_a.mint({"address": ALICE_PK, "value": amount_a}
@@ -1065,7 +1092,7 @@ class TestDex(TestCase):
         launch_exchange_params["curve"] = {"product": None}
 
     def skip_test29_it_compares_curve_swaps_fa12_fa12_flat(self):
-        factory, _, sink = Env().deploy_full_app()
+        factory, _, sink, _ = Env().deploy_full_app()
 
         liquidity_token = Env().deploy_liquidity_token(LqtStorage())
         launch_exchange_params = Factory.launch_exchange_params
@@ -1165,21 +1192,20 @@ class TestDex(TestCase):
             launch_exchange_params["curve"] = {"product": None}
 
     def test30_it_fails_when_token_is_xtz_and_no_amount_was_sent(self):
-        factory, _, sink = Env().deploy_full_app()
+        factory, _, sink, _ = Env().deploy_full_app()
         fa2_init_storage = FA2Storage()
         token_b = Env().deploy_fa2(fa2_init_storage)
         liquidity_token = Env().deploy_liquidity_token(LqtStorage())
         launch_exchange_params = Factory.launch_exchange_params
         launch_exchange_params["token_type_a"] = {"xtz": None}
         launch_exchange_params["token_type_b"] = {"fa2": (token_b.address, 0)}
-        launch_exchange_params["lp_address"] = liquidity_token.address
         amount_a = 10 ** 6
         amount_b = 10 ** 6
         token_b.mint({"address": ALICE_PK, "amount": amount_b,
                       "metadata": {}, "token_id": 0}).send(**send_conf)
         token_b.update_operators([{"add_operator": {
             "owner": ALICE_PK, "operator": factory.address, "token_id": 0}}]).send(**send_conf)
-        launch_exchange_params["token_amount_a"] = {"mutez": None}
+        launch_exchange_params["token_amount_a"] = {"mutez": amount_a}
         launch_exchange_params["token_amount_b"] = {"amount": amount_b}
         factory.launchExchange(launch_exchange_params).with_amount(
             amount_a).send(**send_conf)
@@ -1207,14 +1233,13 @@ class TestDex(TestCase):
         self.assertEqual(err.exception.args[0]["with"], {"int": "238"})
 
     def test31_it_fails_when_token_is_not_xtz_and_amount_is_sent(self):
-        factory, _, sink = Env().deploy_full_app()
+        factory, _, sink, _ = Env().deploy_full_app()
         token_a = Env().deploy_fa12(FA12Storage())
         token_b = Env().deploy_fa12(FA12Storage())
         liquidity_token = Env().deploy_liquidity_token(LqtStorage())
         launch_exchange_params = Factory.launch_exchange_params
         launch_exchange_params["token_type_a"] = {"fa12": token_a.address}
         launch_exchange_params["token_type_b"] = {"fa12": token_b.address}
-        launch_exchange_params["lp_address"] = liquidity_token.address
         amount_a = 10 ** 6
         amount_b = 10 ** 6
         token_a.mint({"address": ALICE_PK, "value": amount_a}
@@ -1252,14 +1277,13 @@ class TestDex(TestCase):
         self.assertEqual(err.exception.args[0]["with"], {"int": "231"})
 
     def test32_it_fails_when_tokens_bought_below_min_tokens_bought(self):
-        factory, _, sink = Env().deploy_full_app()
+        factory, _, sink, _ = Env().deploy_full_app()
         token_a = Env().deploy_fa12(FA12Storage())
         token_b = Env().deploy_fa12(FA12Storage())
         liquidity_token = Env().deploy_liquidity_token(LqtStorage())
         launch_exchange_params = Factory.launch_exchange_params
         launch_exchange_params["token_type_a"] = {"fa12": token_a.address}
         launch_exchange_params["token_type_b"] = {"fa12": token_b.address}
-        launch_exchange_params["lp_address"] = liquidity_token.address
         amount_a = 10 ** 6
         amount_b = 10 ** 6
         token_a.mint({"address": ALICE_PK, "value": amount_a}
@@ -1295,3 +1319,283 @@ class TestDex(TestCase):
         with self.assertRaises(MichelsonError) as err:
             dex.swap(swap_params).send(**send_conf)
         self.assertEqual(err.exception.args[0]["with"], {"int": "215"})
+
+    def test40_it_claims_rewards_successfully_one_deposit(self):
+        factory, _, sink, _ = Env().deploy_full_app()
+        fa2_init_storage = FA2Storage()
+        token_b = Env().deploy_fa2(fa2_init_storage)
+
+        launch_exchange_params = Factory.launch_exchange_params
+        launch_exchange_params["token_type_a"] = {"xtz": None}
+        launch_exchange_params["token_type_b"] = {"fa2": (token_b.address, 0)}
+        amount_a = 10 ** 6
+        amount_b = 10 ** 6
+        token_b.mint({"address": ALICE_PK, "amount": amount_b,
+                      "metadata": {}, "token_id": 0}).send(**send_conf)
+        token_b.update_operators([{"add_operator": {
+            "owner": ALICE_PK, "operator": factory.address, "token_id": 0}}]).send(**send_conf)
+        launch_exchange_params["token_amount_a"] = {"mutez": amount_a}
+        launch_exchange_params["token_amount_b"] = {"amount": amount_b}
+        factory.launchExchange(launch_exchange_params).with_amount(
+            amount_a).send(**send_conf)
+        dex_address = factory.storage["pairs"][(
+            {"xtz": None}, {"fa2": (token_b.address, 0)})]()
+        dex = pytezos.contract(dex_address).using(**_using_params)
+        liquidity_token = dex.storage["lqt_address"]()
+        liquidity_token = pytezos.using(
+            **_using_params).contract(liquidity_token)
+
+        sleep(15)
+
+        added_amount = 10 ** 4
+
+        pytezos.transaction(destination=dex.address,
+                            amount=added_amount).send(**send_conf)
+
+        dex_balance = dex.context.get_balance()
+
+        self.assertEqual(dex_balance, amount_a + added_amount)
+
+        self.assertEqual(dex.storage["total_reward"](), added_amount)
+
+        self.assertLessEqual(dex.storage["reward_per_share"](
+        ), added_amount * accurancy_multiplier // amount_a)
+
+        self.assertGreaterEqual(dex.storage["reward_per_share"](
+        ), added_amount * accurancy_multiplier // amount_a - 1)
+
+        sleep(15)
+
+        resp = dex.claimReward(ALICE_PK).send(**send_conf)
+
+        # breakpoint()
+
+        alice_shares = int(sqrt(amount_a * amount_b))
+
+        alice_reward_paid = alice_shares * dex.storage["reward_per_share"]()
+
+        self.assertEqual(
+            alice_reward_paid, dex.storage["user_rewards"][ALICE_PK]["reward_paid"]())
+
+        internal_operations = resp.opg_result["contents"][0]["metadata"]["internal_operation_results"]
+        self.assertEqual(
+            internal_operations[0]["destination"], ALICE_PK
+        )
+        self.assertGreaterEqual(
+            int(internal_operations[0]["amount"]), added_amount - 1)
+
+        self.assertLessEqual(
+            int(internal_operations[0]["amount"]), added_amount)
+
+        dex_balance = dex.context.get_balance()
+
+        self.assertLessEqual(dex_balance, amount_a + 1)
+
+        self.assertGreaterEqual(dex_balance, amount_a)
+
+    def test41_it_claims_reward_successfully_multiple_deposits(self):
+        factory, _, sink, _ = Env().deploy_full_app()
+        fa2_init_storage = FA2Storage()
+        token_b = Env().deploy_fa2(fa2_init_storage)
+
+        launch_exchange_params = Factory.launch_exchange_params
+        launch_exchange_params["token_type_a"] = {"xtz": None}
+        launch_exchange_params["token_type_b"] = {"fa2": (token_b.address, 0)}
+        amount_a = 10 ** 6
+        amount_b = 10 ** 6
+        token_b.mint({"address": ALICE_PK, "amount": amount_b,
+                      "metadata": {}, "token_id": 0}).send(**send_conf)
+        token_b.update_operators([{"add_operator": {
+            "owner": ALICE_PK, "operator": factory.address, "token_id": 0}}]).send(**send_conf)
+        launch_exchange_params["token_amount_a"] = {"mutez": amount_a}
+        launch_exchange_params["token_amount_b"] = {"amount": amount_b}
+        factory.launchExchange(launch_exchange_params).with_amount(
+            amount_a).send(**send_conf)
+        dex_address = factory.storage["pairs"][(
+            {"xtz": None}, {"fa2": (token_b.address, 0)})]()
+        dex = pytezos.contract(dex_address).using(**_using_params)
+        liquidity_token = dex.storage["lqt_address"]()
+        liquidity_token = pytezos.using(
+            **_using_params).contract(liquidity_token)
+
+        sleep(15)
+
+        added_amount = 10 ** 4
+
+        n = 6
+
+        for i in range(n):
+            pytezos.transaction(destination=dex.address,
+                                amount=added_amount).send(**send_conf)
+
+        dex_balance = dex.context.get_balance()
+
+        self.assertEqual(dex_balance, amount_a + added_amount * n)
+
+        self.assertEqual(dex.storage["total_reward"](), added_amount * n)
+
+        self.assertLessEqual(dex.storage["reward_per_share"](
+        ), added_amount * n * accurancy_multiplier // amount_a)
+
+        self.assertGreaterEqual(dex.storage["reward_per_share"](
+        ), added_amount * n * accurancy_multiplier // amount_a - 1)
+
+        sleep(15)
+
+        resp = dex.claimReward(ALICE_PK).send(**send_conf)
+
+        self.assertEqual(dex_balance, amount_a + n * added_amount)
+
+        alice_shares = int(sqrt(amount_a * amount_b))
+
+        alice_reward_paid = alice_shares * dex.storage["reward_per_share"]()
+
+        self.assertEqual(
+            alice_reward_paid, dex.storage["user_rewards"][ALICE_PK]["reward_paid"]())
+
+        internal_operations = resp.opg_result["contents"][0]["metadata"]["internal_operation_results"]
+        self.assertEqual(
+            internal_operations[0]["destination"], ALICE_PK
+        )
+        self.assertGreaterEqual(
+            int(internal_operations[0]["amount"]), added_amount * n - 1)
+
+        self.assertLessEqual(
+            int(internal_operations[0]["amount"]), added_amount * n)
+
+        dex_balance = dex.context.get_balance()
+
+        self.assertLessEqual(dex_balance, amount_a + 1)
+
+        self.assertGreaterEqual(dex_balance, amount_a)
+
+    def test42_it_claims_reward_successfully_two_lps(self):
+        factory, _, _, _ = Env().deploy_full_app()
+        fa2_init_storage = FA2Storage()
+        token_b = Env().deploy_fa2(fa2_init_storage)
+
+        launch_exchange_params = Factory.launch_exchange_params
+        launch_exchange_params["token_type_a"] = {"xtz": None}
+        launch_exchange_params["token_type_b"] = {"fa2": (token_b.address, 0)}
+        amount_a = 10 ** 6
+        amount_b = 10 ** 6
+        token_b.mint({"address": ALICE_PK, "amount": amount_b * 2,
+                      "metadata": {}, "token_id": 0}).send(**send_conf)
+        token_b.update_operators([{"add_operator": {
+            "owner": ALICE_PK, "operator": factory.address, "token_id": 0}}]).send(**send_conf)
+        launch_exchange_params["token_amount_a"] = {"mutez": amount_a}
+        launch_exchange_params["token_amount_b"] = {"amount": amount_b}
+        factory.launchExchange(launch_exchange_params).with_amount(
+            amount_a).send(**send_conf)
+        dex_address = factory.storage["pairs"][(
+            {"xtz": None}, {"fa2": (token_b.address, 0)})]()
+        dex = pytezos.contract(dex_address).using(**_using_params)
+
+        liquidity_token = dex.storage["lqt_address"]()
+        liquidity_token = pytezos.using(
+            **_using_params).contract(liquidity_token)
+
+        token_pool_a = dex.storage["token_pool_a"]()
+
+        self.assertEqual(token_pool_a, amount_a)
+
+        alice_shares = liquidity_token.storage["tokens"][ALICE_PK]()
+
+        self.assertEqual(alice_shares, sqrt(amount_a * amount_b))
+
+        total_lqt = dex.storage["lqt_total"]()
+
+        self.assertEqual(total_lqt, alice_shares)
+
+        token_b.update_operators([{"add_operator": {
+            "owner": ALICE_PK, "operator": dex_address, "token_id": 0}}]).send(**send_conf)
+
+        add_liquidity_params = {
+            "owner": BOB_PK,
+            "amount_token_a": amount_a,
+            "min_lqt_minted": 0,
+            "max_tokens_deposited": amount_b,
+            "deadline": pytezos.now() + 1000,
+        }
+
+        dex.addLiquidity(add_liquidity_params).with_amount(
+            amount_a).send(**send_conf)
+
+        bob_shares = liquidity_token.storage["tokens"][BOB_PK]()
+
+        self.assertEqual(bob_shares, amount_a * total_lqt // token_pool_a)
+
+        total_lqt = alice_shares + bob_shares
+
+        self.assertEqual(total_lqt, sqrt(
+            amount_a * amount_b) + sqrt(amount_a * amount_b))
+
+        self.assertEqual(total_lqt, dex.storage["lqt_total"]())
+
+        sleep(15)
+
+        added_amount = 10 ** 4
+
+        pytezos.transaction(destination=dex.address,
+                            amount=added_amount).send(**send_conf)
+
+        dex_balance = dex.context.get_balance()
+
+        self.assertEqual(dex_balance, amount_a * 2 + added_amount)
+
+        sleep(15)
+
+        resp = dex.claimReward(ALICE_PK).send(**send_conf)
+
+        internal_operations = resp.opg_result["contents"][0]["metadata"]["internal_operation_results"]
+        self.assertEqual(
+            internal_operations[0]["destination"], ALICE_PK
+        )
+        self.assertGreaterEqual(
+            int(internal_operations[0]["amount"]), added_amount // 2 - 1)
+
+        self.assertLessEqual(
+            int(internal_operations[0]["amount"]), added_amount // 2)
+
+        reward_per_share = added_amount * accurancy_multiplier // total_lqt
+
+        self.assertGreaterEqual(
+            reward_per_share, dex.storage["reward_per_share"]())
+
+        self.assertLessEqual(reward_per_share - 1,
+                             dex.storage["reward_per_share"]())
+
+        alice_reward_paid = alice_shares * dex.storage["reward_per_share"]()
+
+        self.assertEqual(
+            alice_reward_paid, dex.storage["user_rewards"][ALICE_PK]["reward_paid"]())
+
+        dex_balance = dex.context.get_balance()
+
+        self.assertLessEqual(dex_balance, amount_a * 2 + added_amount // 2 + 1)
+
+        self.assertGreaterEqual(dex_balance, amount_a * 2 + added_amount // 2)
+
+        # breakpoint()
+        dex.claimReward(ALICE_PK).send(**send_conf)
+        self.assertEqual(dex.storage["user_rewards"]
+                         [ALICE_PK]["reward_paid"](), alice_reward_paid)
+
+        self.assertEqual(dex.context.get_balance(), dex_balance)
+
+        resp = bob_pytezos.contract(dex.address).claimReward(
+            ALICE_PK).send(**send_conf)
+
+        self.assertGreaterEqual(
+            reward_per_share, dex.storage["reward_per_share"]())
+
+        self.assertLessEqual(reward_per_share - 1,
+                             dex.storage["reward_per_share"]())
+
+        bob_reward_paid = bob_shares * dex.storage["reward_per_share"]()
+
+        self.assertEqual(
+            bob_reward_paid, dex.storage["user_rewards"][BOB_PK]["reward_paid"]())
+
+        self.assertLessEqual(dex.context.get_balance(),
+                             dex_balance - bob_reward_paid // accurancy_multiplier)

@@ -6,11 +6,12 @@
 #include "entrypoints/set_baker.mligo"
 #include "entrypoints/set_lqt_address.mligo"
 #include "entrypoints/swap.mligo"
-#include "entrypoints/update_reserve.mligo"
+#include "entrypoints/update_sink_address.mligo"
 #include "entrypoints/update_token_pool_internal.mligo"
 #include "entrypoints/update_token_pool.mligo"
-#include "entrypoints/set_rewards_address.mligo"
 #include "entrypoints/default.mligo"
+#include "entrypoints/claim_reward.mligo"
+#include "views/get_conversion.mligo"
 
 
 let main (action, store : parameter * storage) : return =
@@ -21,7 +22,7 @@ match action with
 | SetBaker p -> set_baker p store
 | SetLqtAddress p -> set_lqt_address p store
 | Swap p -> swap p store
-| UpadteReserve p -> update_reserve p store
+| UpadteSinkAddress p -> update_sink_address p store
 | UpdateTokenPoolInternal p -> update_token_pool_internal p store
 | UpdateTokenPool -> update_token_pool store
-| SetRewardsAddress p -> set_rewards_address p store
+| ClaimReward p -> claim_reward p store

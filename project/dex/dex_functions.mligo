@@ -1,69 +1,16 @@
 #include "../common/functions.mligo"
 
-
-// [@inline]
-// let a_or_b_is_SMAK (store : storage) : a_or_b option =
-//   if
-//     check_tokens_equal
-//       store.token_type_smak
-//       store.token_type_a
-//   then Some A
-//   else if
-//     check_tokens_equal
-//       store.token_type_smak
-//       store.token_type_b
-//   then Some B
-//   else None
-
-// [@inline]
-// let burn_smak (store : storage) (token_amount : nat) (token_to_burn_type : token_type) : operation list =
-//   if check_tokens_equal
-//     token_to_burn_type
-//     store.token_type_smak then
-//       opt_to_op_list
-//         [make_transfer
-//           token_to_burn_type
-//           Tezos.self_address
-//           null_implicit_account
-//           token_amount
-//           ]
-//   else
-//     let sink_contr =
-//       match (Tezos.get_entrypoint_opt "%burn" store.reserve : sink_burn_param contract option) with
-//       | None -> (failwith error_NO_SINK_CONTRACT_EXISTS : sink_burn_param contract)
-//       | Some contr -> contr in
-//     let amount_to_send = 
-//       if token_to_burn_type = Xtz then Tezos.amount else 0mutez in
-//     let burn_param =
-//     {
-//       token_to_burn_type = token_to_burn_type;
-//       to_burn = token_amount;
-//       min_to_burn = 0n;
-//       swap_direction = true;
-//       deadline = Tezos.now + 1_000_000;
-//     } in
-//     let ops =
-//       match 
-//         (make_transfer
-//           token_to_burn_type
-//           Tezos.self_address
-//           store.sink
-//           token_amount) with
-//           | None -> 
-//     Tezos.transaction burn_param amount_to_send sink_contr
-
 [@inline]
 let mint_or_burn (store : storage) (target : address) (quantity : int) :
     operation option =
   if quantity = 0 then 
     None
   else
+    let lqt_address =
+      match store.lqt_address with
+      | None -> (failwith(error_LQT_ADDRESS_IS_NOT_SET) : address)
+      | Some addr -> addr in
     let lqt_admin : mint_or_burn contract =
-      let lqt_address =
-        match store.lqt_address with
-        | None -> (failwith error_LQT_ADDRESS_IS_NOT_SET : address)
-        | Some lqt_address -> lqt_address
-      in
       match
         (Tezos.get_entrypoint_opt "%mintOrBurn" lqt_address
           : mint_or_burn contract option)
@@ -103,6 +50,7 @@ let rec newton (p : newton_param) : nat =
         (* dy is an underestimate because we start at 0 and the utility curve is convex *)
         newton {p with dy = dy ; n = p.n - 1}
 
+[@inline]
 let flat (pool_a : nat) (pool_b : nat) (diff_a : nat) : nat =
     let x = pool_a in
     let y = pool_b in
@@ -119,101 +67,6 @@ let compute_out_amount (token_in : nat) (in_total : nat) (out_total : nat) (curv
     | Flat ->
     (flat in_total out_total token_in) in
   b_out
-
-
-// [@inline]
-// let compute_out_amount_when_A_or_B_is_SMAK (a_to_b : bool) (aorb_smak : a_or_b) (token_in : nat) (in_total : nat) (out_total : nat) (curve : curve_type) : (nat * nat * nat) =
-//   let reduce = 
-//     match curve with
-//     | Flat -> 9990n
-//     | Product -> 9972n in
-//   let total_fees = abs (10000n - reduce) in
-//   match aorb_smak with
-//   | A ->
-//     if a_to_b
-//     then
-//       let b_out = compute_out_amount (token_in * reduce) in_total out_total curve in
-//       (b_out, ((total_fees * token_in) / 10000n), 0n)
-//     else
-//       let bought_pre =
-//         match curve with
-//         | Flat -> flat (in_total * reduce) out_total token_in / 10000n
-//         | Product -> 
-//           (token_in * out_total) / (in_total + token_in) in
-//       (((reduce * bought_pre) / 10000n), ((total_fees * bought_pre) / 10000n), 0n)
-//   | B ->
-//     if a_to_b
-//     then
-//       let bought_pre = 
-//         match curve with
-//         | Flat -> flat (in_total * reduce) out_total token_in / 10000n
-//         | Product -> 
-//           (token_in * out_total) / (in_total + token_in) in
-//       (((reduce * bought_pre) / 10000n), 0n, ((total_fees * bought_pre) / 10000n))
-//     else
-//       (let b_out = compute_out_amount (token_in * reduce) in_total out_total curve in
-//        (b_out, 0n, ((total_fees * token_in) / 10000n)))
-
-(** Create operations to either withdraw (when the token is not the
-   SMAK token) or burn (when the token is the SMAK token) the
-   tokens. *)
-// let withdraw_or_burn_fees (store : storage) (reserve_fee_to_burn_A : nat)
-//     (reserve_fee_to_burn_B : nat) : operation list =
-//   let withdraw_or_burn_op_A =
-//   burn_smak store reserve_fee_to_burn_A store.token_type_a
-//   in
-//   let withdraw_or_burn_op_B =
-//     (* send B to sink, to burn or exchange to SMAK and burn *)
-//     burn_smak store reserve_fee_to_burn_B store.token_type_b
-//   in
-//     [withdraw_or_burn_op_A; withdraw_or_burn_op_B]
-
-// let compute_fees (store : storage) (amount_in_a : nat) (amount_in_b : nat)
-//     (feeSMAK_A : nat) (feeSMAK_B : nat) : amounts_and_fees =
-//   match a_or_b_is_SMAK store with
-//   | Some _ ->
-//       (* A or B is SMAK: no Uniswap-like adjustments to make *)
-//       {
-//         amount_in_A = amount_in_a;
-//         amount_in_B = amount_in_b;
-//         reserve_fee_in_A = feeSMAK_A;
-//         reserve_fee_in_B = feeSMAK_B;
-//       }
-//   | None -> (
-//       (* Neither A nor B is the SMAK token: See Uniswapv2 whitepaper
-//          or working document to explain these computations *)
-//       let k1 = store.last_k in
-//       let k2 = amount_in_a * amount_in_b in
-//       let sqr1 = sqrt k1 in
-//       let sqr2 = sqrt k2 in
-//       match is_a_nat (sqr2 - sqr1) with
-//       | None ->
-//           (failwith error_K2_SHOULD_BE_GREATER_THAN_K1 : amounts_and_fees)
-//       | Some sq2minussq1 ->
-//           let sm =
-//             (* stillborn, protocol-fee, Uniswap-minted shares  *)
-//             sq2minussq1 * store.lqt_total / (ceildiv (25n * sqr2) 3n + sqr1)
-//           in
-//           (* new reserve fee to "burn" in A *)
-//           let arl = sm * amount_in_a / (store.lqt_total + sm) in
-//           (* new reserve fee to "burn" in B *)
-//           let brl = sm * amount_in_b / (store.lqt_total + sm) in
-//           let new_token_pool_a =
-//             match is_nat (amount_in_a - arl) with
-//             | None -> (failwith error_A_PROTOCOL_FEE_IS_TOO_BIG : nat)
-//             | Some new_token_pool_a -> new_token_pool_a
-//           in
-//           let new_token_pool_b =
-//             match is_nat (amount_in_b - brl) with
-//             | None -> (failwith error_B_PROTOCOL_FEE_IS_TOO_BIG : nat)
-//             | Some new_token_pool_b -> new_token_pool_b
-//           in
-//           {
-//             amount_in_A = new_token_pool_a;
-//             amount_in_B = new_token_pool_b;
-//             reserve_fee_in_A = arl;
-//             reserve_fee_in_B = brl;
-//           })
 
 
 [@inline]
@@ -251,6 +104,7 @@ let update_token_pool_internal_checks (token_address : address) (store : storage
   else ()
 
 
+[@inline]
 let deposit_smak (store : storage) (type_to_burn : token_type) (burn_amount : nat) (reserve_amount : nat) (reference_token: token_type) (direction : bool) : operation option list =
   if burn_amount = 0n && reserve_amount = 0n then
     ([] : operation option list)
@@ -291,3 +145,77 @@ let deposit_smak (store : storage) (type_to_burn : token_type) (burn_amount : na
         in
 
       [opt_op_transfer; opt_op_deposit]
+
+
+[@inline]
+let get_user_reward_info (addr : address) (store : storage) : user_reward_info =
+    match Big_map.find_opt addr store.user_rewards with
+      | None -> {
+          reward = 0n; 
+          reward_paid = 0n;
+        }
+      | Some instance -> instance
+    
+[@inline]
+let update_reward (store : storage) : storage =
+    let rewards_time = 
+      if Tezos.now > store.period_finish then
+        store.period_finish
+      else 
+        Tezos.now in
+    let new_reward = 
+        abs(rewards_time - store.last_update_time) * store.reward_per_sec in
+//
+    let new_reward_per_share = store.reward_per_share + new_reward / store.lqt_total in 
+    let new_last_update_time = Tezos.now in 
+//
+    let new_store =
+      {
+        store with
+        reward_per_share = new_reward_per_share;
+        last_update_time = new_last_update_time;
+        reward = new_reward;
+      } in
+
+    
+      if Tezos.now > store.period_finish then 
+        let delta_time = Tezos.now - store.period_finish in 
+        let new_reward_per_sec =  store.reward * accurancy_multiplier / abs(delta_time) in 
+        let new_reward = abs(delta_time) * new_reward_per_sec in 
+        let new_period_finish = store.period_finish + delta_time in 
+        let new_reward_per_share = store.reward_per_share + new_reward / store.lqt_total  in 
+        let new_reward = 0n in 
+        let xtz_pool =
+          if store.token_type_a = Xtz then
+            store.token_pool_a
+          else
+            store.token_pool_b in
+        let new_total_reward = abs((mutez_to_natural Tezos.balance) - xtz_pool) in
+        {
+          store with
+          reward_per_share = new_reward_per_share;
+          last_update_time = new_last_update_time; 
+          reward_per_sec = new_reward_per_sec;
+          period_finish = new_period_finish;
+          reward = new_reward;
+          total_reward = new_total_reward;
+        } 
+      else
+        new_store
+
+[@inline]
+let update_user_reward (addr : address) (old_balance : nat) (new_balance : nat) (store : storage) : storage =
+    let user_reward_info = get_user_reward_info addr store in 
+    let current_reward = old_balance * store.reward_per_share in
+    let delta_reward = current_reward - user_reward_info.reward_paid in 
+    let reward = user_reward_info.reward + abs(delta_reward) in 
+    let reward_paid = (new_balance * store.reward_per_share) in 
+    let new_user_reward_info = 
+      {
+          reward = reward;
+          reward_paid = reward_paid;
+      } in
+    let new_user_reward = Big_map.update addr (Some new_user_reward_info) store.user_rewards in
+
+    let new_store = { store with user_rewards  = new_user_reward} in 
+    new_store

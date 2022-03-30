@@ -144,3 +144,6 @@ constant product exchange ratio : 0.09207344200148576
 flat-curve : 10000000000 tokens sold; 17645422991 tokens bought; 
 flat curve exchange ratio : 0.5667191999364636 
 
+
+
+

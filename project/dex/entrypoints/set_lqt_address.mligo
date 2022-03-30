@@ -4,7 +4,4 @@ let set_lqt_address (param : set_lqt_address_param) (store : storage) : return =
     else if Tezos.sender <> store.manager then
         (failwith error_ONLY_MANAGER_CAN_SET_LIQUIDITY_ADDRESS : return)
     else
-        match store.lqt_address with
-        | None ->
-            (([] : operation list), {store with lqt_address = Some param})
-        | Some _ -> (failwith error_LQT_ADDRESS_ALREADY_SET : return)
+        (([] : operation list), {store with lqt_address = (Some param)})

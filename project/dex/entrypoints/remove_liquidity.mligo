@@ -1,4 +1,3 @@
-
 let remove_liquidity (param : remove_liquidity_param) (store : storage) : return =
       let {
       rem_to = to_;
@@ -61,29 +60,44 @@ let remove_liquidity (param : remove_liquidity_param) (store : storage) : return
                     to_
                     tokens_a_withdrawn
             in
-            
-            let new_store =
+            let ops =
+              opt_to_op_list [op_token_a_transfer; op_token_b_transfer; op_lqt_mint_or_burn] in
+
+           if store.token_type_a = Xtz || store.token_type_b = Xtz then
+                let balance_of_request = Tezos.sender in
+                let lqt_address =
+                  match store.lqt_address with
+                  | None -> (failwith(error_LQT_ADDRESS_IS_NOT_SET) : address)
+                  | Some addr -> addr in
+                let user_balance = 
+                  match (Tezos.call_view "balance_of_view" balance_of_request lqt_address : nat option) with
+                  | None -> (failwith "View returned an error" : nat)
+                  | Some user_balance -> user_balance in
+               
+               let new_user_balance =
+                match is_a_nat (user_balance - lqt_burned) with
+                  | None ->
+                    (failwith error_USER_BALANCE_IS_INSUFFISANT : nat)
+                  | Some user_balance -> user_balance in
+
+               let new_store = update_reward store in 
+               let new_store = update_user_reward Tezos.sender user_balance new_user_balance new_store in 
+               let new_store =
+                {
+                  new_store with
+                  lqt_total = new_lqt_total;
+                  token_pool_a = new_pool_a;
+                  token_pool_b = new_pool_b;
+
+                } in
+              ops, new_store
+           else 
+                 let new_store =
                 {
                   store with
                   lqt_total = new_lqt_total;
                   token_pool_a = new_pool_a;
                   token_pool_b = new_pool_b;
+
                 } in
-            let ops = opt_to_op_list [op_token_a_transfer; op_token_b_transfer; op_lqt_mint_or_burn] in
-            let ops =
-              if store.token_type_a = Xtz || store.token_type_b = Xtz then
-                let baker_rewards =
-                    match store.baker_rewards with
-                    | None -> (failwith error_BAKER_REWARDS_ADDRESS_IS_NOT_SET : address)
-                    | Some baker_rewards -> baker_rewards in
-
-                let reward_remove_lqt_entry =
-                    match (Tezos.get_entrypoint_opt "%removeLqt" baker_rewards : baker_rewards_remove_lqt contract option) with
-                    | None -> (failwith(error_BAKER_REWARDS_CONTRACT_HAS_NO_REMOVELQT_ENTRYPOINT) : baker_rewards_remove_lqt contract)
-                    | Some contr -> contr in
-
-                let op_reward = Tezos.transaction lqt_burned 0mutez reward_remove_lqt_entry in
-              op_reward :: ops 
-            else 
-              ops in
-            ops, new_store
+          ops, new_store

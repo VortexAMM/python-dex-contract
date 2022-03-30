@@ -26,3 +26,14 @@
 [@inline] let error_SINK_HAS_NO_UPDATE_CLAIM_LIMIT = 126n
 [@inline] let error_ONLY_ADMIN_CAN_LAUNCH_SINK = 127n
 [@inline] let error_FLAT_CURVE_EXCHANGE_SHOULD_HAVE_EQUAL_POOLS = 128n
+[@inline] let error_ONLY_ADMIN_CAN_UPDATE_SINK_ADDRESS = 129n
+[@inline] let error_COUNTER_OUTSIDE_POOL_LIMIT = 130n
+[@inline] let error_EXCHANGE_HAS_NO_UPDATE_SINK_ENTRYPOINT = 131n
+[@inline] let error_MUTEZ_AMOUNT_SHOULD_BE_EQUAL_TO_AMOUNT_SENT = 132n
+[@inline] let error_REWARD_PERIOD_IS_ZERO = 133n
+[@inline] let error_EXCHANGE_HAS_NO_UPDATE_REWARD_PERIOD_ENTRYPOINT = 134n
+[@inline] let error_ONLY_ADMIN_CAN_UPDATE_REWARD_PERIOD = 135n
+[@inline] let error_EXCHANGE_NOT_IN_PAIRS = 136n
+[@inline] let error_EXCHANGE_NOT_IN_POOLS = 137n
+[@inline] let error_INDEX_NOT_MATCHING_TOKENS = 138n
+[@inline] let error_SINK_HAS_NO_REMOVE_EXCHANGE = 139n

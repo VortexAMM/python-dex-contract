@@ -1,6 +1,13 @@
 let launch_sink (store : storage) : return =
-  if Tezos.sender <> store.admin then
-    (failwith(error_ONLY_ADMIN_CAN_LAUNCH_SINK) : return)
+  if Tezos.sender <> store.multisig then
+      let sender_address = Tezos.self_address in
+      let func () =
+        match (Tezos.get_entrypoint_opt "%launchSink" sender_address : unit contract option) with
+          | None -> (failwith("no launchSink entrypoint") : operation list)
+          | Some launch_sink_entrypoint ->
+            [Tezos.transaction () 0mutez launch_sink_entrypoint]
+        in
+        (prepare_multisig "launchSink" () func store), store
   else
     match store.default_sink with
     | Some _ -> (failwith error_SINK_CONTRAT_HAS_ALREADY_BEEN_DEPLOYED : return)

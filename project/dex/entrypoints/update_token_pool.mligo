@@ -4,17 +4,22 @@ let fa2_balance_callback (token_pool : fa2_update_token_pool_internal) : nat =
   | (_, amt)::[] -> amt
   | _ -> (failwith error_INVALID_FA2_BALANCE_RESPONSE : nat)
 
+[@inline]
 let get_entrypoint_A2 () : balance_of_response list contract option =
   (Tezos.get_entrypoint_opt "%fA2InternalA" Tezos.self_address : balance_of_response list contract option)
 
+[@inline]
 let get_entrypoint_A12 () : nat contract option =
   (Tezos.get_entrypoint_opt "%fA12InternalA" Tezos.self_address : nat contract option)
 
+[@inline]
 let get_entrypoint_B2 () : balance_of_response list contract option =
   (Tezos.get_entrypoint_opt "%fA2InternalB" Tezos.self_address : balance_of_response list contract option)
 
+[@inline]
 let get_entrypoint_B12 () : nat contract option =
   (Tezos.get_entrypoint_opt "%fA12InternalB" Tezos.self_address : nat contract option)
+
 
 let update_ended_callback () : operation =
   let my_address = Tezos.self_address in
@@ -52,6 +57,7 @@ let update_token_pool_aux (token_id : fa_token) (get_entrypoint2 : unit -> balan
     Tezos.transaction (my_address, cfmm_update_token_pool_internal) 0mutez
       token_get_balance
 
+[@inline]
 let update_token_pool_aux_fa12 (token_address : address) (get_entrypoint12 : unit -> nat contract option) : operation =
   let my_address = Tezos.self_address in
     let token_get_balance : get_balance_fa12 contract =
@@ -64,6 +70,7 @@ let update_token_pool_aux_fa12 (token_address : address) (get_entrypoint12 : uni
     Tezos.transaction (my_address, cfmm_update_token_pool_internal) 0mutez
       token_get_balance
 
+[@inline]
 let update_token_pool_aux_fa2 (token_address : address) (token_id : nat) (get_entrypoint2 : unit -> balance_of_response list contract option) : operation =
   let my_address = Tezos.self_address in
   let token_balance_of : balance_of_param contract =

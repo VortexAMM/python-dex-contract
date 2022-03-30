@@ -1,5 +1,5 @@
 #include "../common/interface.mligo"
-
+[@inline] let accurancy_multiplier = 1_000_000_000_000n
 type a_or_b = A | B
 
 type amounts_and_fees = 
@@ -36,7 +36,6 @@ type remove_liquidity_param =
 
 type set_baker_param = dex_set_baker_param
 
-
 type swap_param = dex_swap_param
 
 type set_lqt_address_param = address
@@ -63,7 +62,7 @@ type parameter =
 | SetBaker of set_baker_param
 | SetLqtAddress of set_lqt_address_param
 | Swap of swap_param
-| UpadteReserve of update_reserve_param
+| UpadteSinkAddress of address
 | UpdateTokenPoolInternal of update_token_pool_internal
 | UpdateTokenPool of update_token_pool_param
-| SetRewardsAddress of address
+| ClaimReward of address

@@ -8,6 +8,7 @@
 #include "entrypoints/claim.mligo"
 #include "entrypoints/update_claim_limit.mligo"
 #include "entrypoints/add_exchange.mligo"
+#include "entrypoints/remove_exchange.mligo"
 
 let main (action, store : parameter * storage) : return =
 match action with
@@ -15,5 +16,6 @@ match action with
 | Claim p -> claim p store
 | UpdateClaimLimit p -> update_claim_limit p store
 | AddExchange p -> add_exchange p store
+| RemoveExchange p -> remove_exchange p store
 
 #endif

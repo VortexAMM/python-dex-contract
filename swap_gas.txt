@@ -74,3 +74,34 @@ old swap fa1.2 to fa1.2 : 14855 gas; 1900 mutez fee;
 new swap fa1.2 to fa1.2 : 8302 gas; 1199 mutez fee; 
 old swap fa2 to fa2 : 17084 gas; 2122 mutez fee; 
 new swap fa2 to fa2 : 10752 gas; 1444 mutez fee; 
+
+
+
+new swap fa1.2 to fa2 : 16252 gas; 1995 mutez fee; 
+new swap fa2 to fa1.2 : 16729 gas; 2042 mutez fee; 
+new swap fa1.2 to fa1.2 : 14711 gas; 1841 mutez fee; 
+new swap fa2 to fa2 : 18273 gas; 2197 mutez fee; 
+new swap fa1.2 to xtz : 13011 gas; 1671 mutez fee; 
+new swap xtz to fa1.2 : 7621 gas; 1133 mutez fee; 
+new swap fa2 to xtz : 15031 gas; 1873 mutez fee; 
+new swap xtz to fa2 : 9162 gas; 1287 mutez fee; 
+new swap fa1.2 to fa2 : 16253 gas; 1995 mutez fee; 
+new swap fa2 to fa1.2 : 16731 gas; 2043 mutez fee; 
+new swap fa1.2 to fa1.2 : 14711 gas; 1841 mutez fee; 
+new swap fa2 to fa2 : 18273 gas; 2197 mutez fee; 
+new swap fa1.2 to xtz : 13029 gas; 1671 mutez fee; 
+new swap xtz to fa1.2 : 7639 gas; 1133 mutez fee; 
+new swap fa2 to xtz : 15049 gas; 1873 mutez fee; 
+new swap xtz to fa2 : 9181 gas; 1289 mutez fee; 
+new swap fa1.2 to fa2 : 16272 gas; 1997 mutez fee; 
+new swap fa2 to fa1.2 : 16751 gas; 2045 mutez fee; 
+new swap fa1.2 to fa1.2 : 14731 gas; 1843 mutez fee; 
+new swap fa2 to fa2 : 18293 gas; 2199 mutez fee; 
+new swap fa1.2 to xtz : 13022 gas; 1672 mutez fee; 
+new swap xtz to fa1.2 : 7632 gas; 1134 mutez fee; 
+new swap fa2 to xtz : 15042 gas; 1874 mutez fee; 
+new swap xtz to fa2 : 9173 gas; 1288 mutez fee; 
+new swap fa1.2 to fa2 : 16264 gas; 1996 mutez fee; 
+new swap fa2 to fa1.2 : 16743 gas; 2044 mutez fee; 
+new swap fa1.2 to fa1.2 : 14723 gas; 1842 mutez fee; 
+new swap fa2 to fa2 : 18285 gas; 2198 mutez fee; 

@@ -6,6 +6,7 @@
 #include "entrypoints/get_allowance.mligo"
 #include "entrypoints/get_balance.mligo"
 #include "entrypoints/get_total_supply.mligo"
+#include "views/balance_of_view.mligo"
 
 let main (param, storage : parameter * storage) : return =
     if Tezos.amount <> 0mutez

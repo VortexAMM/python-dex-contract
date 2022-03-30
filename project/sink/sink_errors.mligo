@@ -20,5 +20,8 @@
 [@inline] let error_ONLY_FACTORY_CAN_ADD_EXCHANGE = 319n
 [@inline] let error_NO_SMAK_TO_TOKEN_DEX = 320n
 [@inline] let error_PAIR_DOES_NOT_EXIST = 321n
-[@inline] let error_ONLY_EXCHANGES_CAN_DEPOSIT = 322n
-[@inline] let error_TOKEN_LIST_EMPTY = 322n
+[@inline] let error_ONLY_EXCHANGES_CAN_DEPOSIT = 323n
+[@inline] let error_TOKEN_LIST_EMPTY = 324n
+[@inline] let error_EXCHANGE_NOT_LISTED = 325n
+[@inline] let error_NO_CLAIM_ENTRYPOINT = 326n
+[@inline] let error_ADDRESS_SUPPLIED_BY_FACTORY_NOT_IN_STORAGE = 327n

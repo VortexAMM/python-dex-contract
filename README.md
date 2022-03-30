@@ -2,34 +2,6 @@
 
 This is a description of a system composing a Decentralized Exchange (DEX) network.
 
-## User Instructions:
-
-### setup:
-
-run the command `docker-compose up -d`
-
-from the folder `project` run the command `./compile.sh` to compile all contracts.
-
-### Deploy contracts:
-
-From the folder `project/tests` run `python3 deploy.py`  
-*if deployment is to the testnet, make sure the `SHELL = "http://localhost:20000"` line is commented, and the line below is uncommented*
-
-The `deploy.py` file is set to deploy a factory with no exchanges on it.
-To deploy a factory with an assortment of exchanges on it, uncomment the last line of `deploy.py`, and comment the line above it.
-The factory's address and its sink contract address will be output at the `project/real_contracts.txt` file.
-
-Individual exchanges can be launched by calling `factory.launchExchange(params).send(**send_conf)`
-With `param` as described in the "launch exchange" section.
-
-
-### Testing The Contracts:
-
-All contract tests are in the folder `project/tests`.
-To run a test run `python3 -m unittest test_file_name.py`.
-For example: to run the factory tests, run `python3 -m unittest test_factory.py`.
-Make sure that you run `docker-compose up -d` before running the tests.
-
 ## System Architecture
 
 The system is comprised of the following smart-contracts, which interact with each other.
@@ -49,22 +21,52 @@ An **FA1.2** standard token contract, handling liquidity shares of all liquidity
 - **Sink Reward:**
 A contract that rewards external user when trigering the *swap and burn* mechanism of the *Swap* contract.
 
-- **baker rewards:**
-A contract handing out of the baker rewards to liquidity providers.
 
 
 
+### General Types:
+Types used throughout the contracts.
+
+**`token_type`** is a type introduced in order to generalize the pools.
+Instead of having exchanges only between token(fa1.2 or fa2) to XTZ, in this version the native token `XTZ` is treated like all other tokens. To determine the interface that the exchange will interact with, the type of the exchange's tokens needs to be determined at the exchange launch.
+`token_type` is one of the following:
+`{"xtz": Unit (or None)}`
+`{"fa12": address}`
+`{"fa2": (address, token_id)}`
+
+**`token_amount`** is another type introduced for letting the exchange determine the interface it interacts with.
+`token_amount` is one of the following:
+`{"mutez": nat}`
+`{"amount": nat}`
+`mutez` should be chosen at exchange launch for an `xtz` type pool's initial amount.
+`amount` should be chosen for all other pool's initial amount.
+
+**`curve`** is a type used to determine the exchange model of the exchange.
+`curve` is one of the following:
+`flat`
+`product`
+
+The `flat` curve sets a CFMM model to the exchange, that makes very accurate 1-to-1 ratio exchanges with very low slippage for very large ranges of amount-to-pool-size ratios, making it extremely usefull for pegged token pairs. When choosing the `flat` curve at exchange launch, the factory contract demands a 1-to-1 initial pool ratio.
+The `product` curve sets a standard constant-product AMM model to the exchange. This model is more accurate for non-pegged token pairs, with varying exchange ratios.
+
+## Factory
+The factory contract is a contract handling all the system's set up.
+It stores general information about the different exchanges, launches the contracts with default or varying values, and updates general settings for the contracts after launch.
+
+*A multisig contract controls acces to all administration entrypoints, to make administration of the system more decentralized*
 
 ### launch_exchange
 This entry-point is used to launch the dex  contract and initialize its storage.
 
 **Input parameters:**  
-- `token_type_a` : token input;
-- `token_type_b` : token output;
-- `token_amount_a` : token input amount;
-- `token_amount_b` : token output amount;
-- `curve` : type of dex(constant product or flat curve);
-- `lp_address` : lp token address;
+- `token_type_a` : `token_type`; (input token)
+- `token_type_b` : `token_type`; (second input token)
+- `token_amount_a` : `token_amount`; (token input amount)
+- `token_amount_b` : `token_amount` ; (second token input amount)
+- `curve` : `curve`;  type of dex(constant product or flat curve)
+- `metadata` : the metadata fields of the exchange's LP token contract
+- `token_metadata` : the metadata fields for the exchange's LP token
+
 
 ```mermaid 
 flowchart TD
@@ -130,7 +132,51 @@ Factory-contract-.-exchange-2
 Factory-contract-.-exchange-3
 A--->|dex_storage, lp_storage, am|exchange-4
 ```
+
+### Remove exchange:
+This entrypoint is used to remove an individual exchange from the factory's entries. The exchange can still be active after its removal, but is not linked to the system and can be replaced by a differnt exchange for its tokens.
+
+Input Parameters:
+`token_a : token_type` One of the removed exchange's tokens.
+`token_b : token_type` The second removed exchange's token.
+`index` The index of the exchange, corresponding to this exchange's id in the `pools` mapping.
+
+The order of `token_a, token_b` doesn't matter, but the pair of tokens has to point to the same exchange as the index does.
+
+### Launch sink:
+This entrypoint is used to deploy a sink contract that will be used by all the exchanges.
+If the sink is not launched, the `launchExchange` entrypoint will fail.
+No input parameters are required by this entrypoint, but it is being controlled by multisig.
+
+### Update sink address:
+This entrypoint assignes a new sink contract to all exchanges.
+
+Input Parameters:
+To avoid reaching the operation gas limit, because this entrypoint calls multiple contracts to update them, the range of pools to update is input at the entrypoint call.
+This range is determined by the parameters:
+`first_pool : nat`
+`number_of_pools : nat`
+The third parameter is `new_sink_address : address`.
+
+This entrypoint, as all administration entrypoints, is controlled by multisig.
+The new sink contract should have the same interface, to be compatible with the different sink calls, but the logic can be different if needed.
+
+### Set sink claim limit:
+This entrypoint is used to change the number of tokens that can be burnt and claimed.
+Due to the limit of aproximately 1 milion gas units allowed per transaction, when the number of tokens in the system gets larger, with a maximum gas consumed for token claim of about 20500 (FA2 tokens), the number of tokens has to be limited. The limit is stored in the sink's `token_claim_limit` field, and is set by the factory's `default_claim_limit`. This limit can be adjusted by the `setSinkClaimLimit` entrypoint if needed.
+
+Input parameter: `nat` : the new claim limit.
+This entrypoint is also controlled by a multisig.
+
+
+
+
+
+
+
+
 ### Set Liquidity Address:
+This entrypoint is used as a callback when the `launchExchange` entrypoint is called. It sets an individual exchange's liquidity-token address.
 
 ```mermaid
 flowchart TD
@@ -398,15 +444,3 @@ E-->|swaped smak|tokens
 F-->|tokens to burn|G
 F-->|reward|H
 ```
-
-
-# Contract addresses:
-Factory with no exchanges: KT1Dnzyn5Jx2C3Pb21G436KKjv1akRUs7e5Y
-Sink: KT1KeJXrkuYJQV1Jwf1f5oWnmM4S7jFmJo3F
-
-Factory with exchanges: KT1RQJwAQpvjTPDAQmWBAyMcLekh5LUpaKV8
-Sink: KT1KJhuGpn8QvKDDB8nYvVyVvbiUZTDvBMpC
-Exchange 1: KT1MJcPSBxei9v1TtQkBikcftd5omsPE48gm
-Liquidity token 1: KT1NBcrbsKjmjnSGxBaqwDRr3Xo4AYg2fFVp
-Exchange 2: KT1EDx1yf837ucDTF5zGRynUiJrx8UXHaTPV
-Liquidity token 2: KT19UeguSJgcZSDc5ufExQ7KTkVzNrnzx7R4 

@@ -52,17 +52,6 @@ let deploy_lp_token (init_storage : lp_token_storage) : (operation * address) =
     ((None : key_hash option), 0tez, init_storage)
 
 
-let deploy_baker_rewards (init_storage : baker_rewards_storage) : (operation * address) =
-  ([%Michelson
-    ({| {  UNPPAIIR ;
-           CREATE_CONTRACT
-#include "../michelson/baker_rewards.tz"
-  ;
-           PAIR } |} : 
-       (key_hash option * tez * baker_rewards_storage) -> (operation * address))])
-    ((None : key_hash option), 0tez, init_storage)
-
-
 [@inline]
 let make_transfer_to_dex (opt_id : token_type) (from_addr : address) (to_addr : address) (token_amount : nat) :
     operation option =
@@ -97,3 +86,26 @@ let make_transfer_to_dex (opt_id : token_type) (from_addr : address) (to_addr : 
                    0mutez
                    (get_contract_FA2_transfer token_address))
           | Xtz -> None
+
+[@inline]
+let prepare_multisig (type p) (entrypoint_name: string) (param: p) (func: unit -> operation list) (store : storage) : operation list =
+    match (Tezos.get_entrypoint_opt "%callMultisig" store.multisig : call_param contract option ) with
+    | None -> (failwith("no call entrypoint") : operation list)
+    | Some contract ->
+        let packed = Bytes.pack param in
+        let param_hash = Crypto.sha256 packed in
+        let entrypoint_signature =
+          {
+            name = entrypoint_name;
+            params = param_hash;
+            source_contract = Tezos.self_address;
+          }
+        in
+        let call_param =
+        {
+          entrypoint_signature = entrypoint_signature;
+          callback = func;
+        }
+        in
+        let set_storage = Tezos.transaction call_param 0mutez contract in
+        [set_storage]

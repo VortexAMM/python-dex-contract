@@ -1,3 +1,14 @@
 new remove_liquidity with baker_rewards call : 14282 gas; 
 new remove_liquidity with no baker_rewards call : 11607 gas; 
 old remove_liquidity : 10928 gas; 
+
+
+
+new remove_liquidity with no baker_rewards call : 11618 gas; 
+new remove_liquidity with no baker_rewards call : 11619 gas; 
+new remove_liquidity with no baker_rewards call : 11618 gas; 
+new remove_liquidity with no baker_rewards call : 11618 gas; 
+new remove_liquidity with no baker_rewards call : 11617 gas; 
+new remove_liquidity with baker_rewards call : 12982 gas; 
+new remove_liquidity with no baker_rewards call : 11618 gas; 
+new remove_liquidity with baker_rewards call : 12982 gas; 

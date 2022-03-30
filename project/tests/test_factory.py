@@ -1,4 +1,4 @@
-from test_env import Env, ALICE_PK, pytezos, FA12Storage, FA2Storage, FactoryStorage, LqtStorage, send_conf
+from test_env import Env, ALICE_PK, pytezos, FA12Storage, FA2Storage, FactoryStorage, LqtStorage, send_conf, BOB_PK, bob_pytezos
 from data import default_token_info
 from unittest import TestCase
 import math
@@ -7,13 +7,27 @@ from pytezos.contract.result import OperationResult
 
 
 class Factory:
+    metadata = {
+        "name": "",
+        "version": "",
+        "homepage": "",
+        "authors": [""],
+    }
+    token_metadata = {
+        "uri": "",
+        "symbol": "",
+        "decimals": "",
+        "shouldPreferSymbol": "",
+        "thumbnailUri": "",
+    }
     launch_exchange_params = {
         "token_type_a": {},
         "token_type_b": {},
         "token_amount_a": 0,
         "token_amount_b": 0,
         "curve": "product",
-        "lp_address": ALICE_PK,
+        "metadata": metadata,
+        "token_metadata": token_metadata,
     }
 
 
@@ -33,7 +47,7 @@ class TestFactory(TestCase):
         TestFactory.print_title(self)
 
     def test1_it_launches_exchange(self):
-        factory, _, _ = Env().deploy_full_app()
+        factory, _, _, _ = Env().deploy_full_app()
         tokens = []
         fa12_init_storage = FA12Storage()
         for token_info in default_token_info[:3]:
@@ -64,7 +78,6 @@ class TestFactory(TestCase):
                 "fa2": (token.address, 0)}, "address": token.address, "decimals": decimals}
             tokens.append(token)
         for i, token_a in enumerate(tokens[:]):
-            liquidity_token = Env().deploy_liquidity_token(LqtStorage())
             decimals_a = token_a["decimals"]
             address_a = token_a["address"]
             amount_a = int(1000 * math.pow(10, decimals_a))
@@ -80,13 +93,12 @@ class TestFactory(TestCase):
                 pytezos.contract(address_a).update_operators([{"add_operator": {
                     "owner": ALICE_PK, "operator": factory.address, "token_id": 0}}]).send(**send_conf)
             amount_b = amount_a
-            amount_type_b = {"mutez": None}
+            amount_type_b = {"mutez": amount_b}
             launch_exchange_params = Factory.launch_exchange_params
             launch_exchange_params["token_amount_a"] = amount_type_a
             launch_exchange_params["token_amount_b"] = amount_type_b
             launch_exchange_params["token_type_a"] = token_a["token_type"]
             launch_exchange_params["token_type_b"] = {"xtz": None}
-            launch_exchange_params["lp_address"] = liquidity_token.address
             opg = factory.launchExchange(
                 launch_exchange_params).with_amount(amount_b).send(**send_conf)
             consumed_gas = OperationResult.consumed_gas(opg.opg_result)
@@ -156,7 +168,7 @@ class TestFactory(TestCase):
             "test2_it_fails_when_sink_is_not_deployed")
 
     def test3_it_fails_when_tokens_are_equal_fa12(self):
-        factory, smak_token, sink = Env().deploy_full_app()
+        factory, smak_token, sink, multisig = Env().deploy_full_app()
         fa12_init_storage = FA12Storage()
         token_a = Env().deploy_fa12(fa12_init_storage)
         launch_exchange_params = Factory.launch_exchange_params
@@ -172,7 +184,7 @@ class TestFactory(TestCase):
             "test3_it_fails_when_tokens_are_equal_fa12")
 
     def test4_it_fails_when_tokens_are_equal_fa2(self):
-        factory, smak_token, sink = Env().deploy_full_app()
+        factory, smak_token, sink, multisig = Env().deploy_full_app()
         fa2_init_storage = FA2Storage()
         token_a = Env().deploy_fa2(fa2_init_storage)
         launch_exchange_params = Factory.launch_exchange_params
@@ -190,10 +202,10 @@ class TestFactory(TestCase):
             "test4_it_fails_when_tokens_are_equal_fa2")
 
     def test5_it_fails_when_tokens_are_equal_xtz(self):
-        factory, smak_token, sink = Env().deploy_full_app()
+        factory, smak_token, sink, multisig = Env().deploy_full_app()
         launch_exchange_params = Factory.launch_exchange_params
-        launch_exchange_params["token_amount_a"] = {"mutez": None}
-        launch_exchange_params["token_amount_b"] = {"mutez": None}
+        launch_exchange_params["token_amount_a"] = {"mutez": 10 ** 6}
+        launch_exchange_params["token_amount_b"] = {"mutez": 10 ** 6}
         launch_exchange_params["token_type_a"] = {"xtz": None}
         launch_exchange_params["token_type_b"] = {"xtz": None}
         with self.assertRaises(MichelsonError) as err:
@@ -204,7 +216,7 @@ class TestFactory(TestCase):
             "test5_it_fails_when_tokens_are_equal_xtz")
 
     def test6_it_fails_when_pair_already_exists(self):
-        factory, smak_token, sink = Env().deploy_full_app()
+        factory, smak_token, sink, multisig = Env().deploy_full_app()
         fa2_init_storage = FA2Storage()
         token_a = Env().deploy_fa2(fa2_init_storage)
         token_a.mint({"address": ALICE_PK, "amount": 10 ** 6,
@@ -250,7 +262,7 @@ class TestFactory(TestCase):
             "test6_it_fails_when_pair_already_exists")
 
     def test7_it_fails_when_pools_are_empty_fa12(self):
-        factory, smak_token, sink = Env().deploy_full_app()
+        factory, smak_token, sink, multisig = Env().deploy_full_app()
         fa12_init_storage = FA12Storage()
         token_a = Env().deploy_fa12(fa12_init_storage)
         token_b = Env().deploy_fa12(fa12_init_storage)
@@ -275,7 +287,7 @@ class TestFactory(TestCase):
             "test7_it_fails_when_pools_are_empty_fa12")
 
     def test8_it_fails_when_pools_are_empty_fa2(self):
-        factory, smak_token, sink = Env().deploy_full_app()
+        factory, smak_token, sink, multisig = Env().deploy_full_app()
         fa2_init_storage = FA2Storage()
         token_a = Env().deploy_fa2(fa2_init_storage)
         token_b = Env().deploy_fa2(fa2_init_storage)
@@ -302,7 +314,7 @@ class TestFactory(TestCase):
             "test8_it_fails_when_pools_are_empty_fa2")
 
     def test9_it_fails_when_pools_are_empty_xtz(self):
-        factory, smak_token, sink = Env().deploy_full_app()
+        factory, smak_token, sink, multisig = Env().deploy_full_app()
         fa2_init_storage = FA2Storage()
         token_b = Env().deploy_fa2(fa2_init_storage)
         token_b.mint({"address": ALICE_PK, "amount": 10 ** 6,
@@ -314,10 +326,80 @@ class TestFactory(TestCase):
         launch_exchange_params["token_type_b"] = {
             "fa2": (token_b.address, 0)}
         launch_exchange_params["token_amount_b"] = {"amount": 10 ** 6}
-        launch_exchange_params["token_amount_a"] = {"mutez": None}
+        launch_exchange_params["token_amount_a"] = {"mutez": 10 ** 6}
         with self.assertRaises(MichelsonError) as err:
             factory.launchExchange(
                 launch_exchange_params).send(**send_conf)
-        self.assertEqual(err.exception.args[0]["with"], {"int": "103"})
+        self.assertEqual(err.exception.args[0]["with"], {"int": "132"})
         TestFactory.print_success(
             "test9_it_fails_when_pools_are_empty_xtz")
+
+    def test10_it_removes_an_exchange(self):
+        factory, smak_token, sink, multisig = Env().deploy_full_app()
+        fa2_init_storage = FA2Storage()
+        token_b = Env().deploy_fa2(fa2_init_storage)
+        token_b.mint({"address": ALICE_PK, "amount": 10 ** 6,
+                      "metadata": {}, "token_id": 0}).send(**send_conf)
+        token_b.update_operators([{"add_operator": {
+            "owner": ALICE_PK, "operator": factory.address, "token_id": 0}}]).send(**send_conf)
+        launch_exchange_params = Factory.launch_exchange_params
+        launch_exchange_params["token_type_a"] = {"xtz": None}
+        launch_exchange_params["token_type_b"] = {
+            "fa2": (token_b.address, 0)}
+        launch_exchange_params["token_amount_b"] = {"amount": 10 ** 6}
+        launch_exchange_params["token_amount_a"] = {"mutez": 10 ** 6}
+        factory.launchExchange(
+            launch_exchange_params).with_amount(10 ** 6).send(**send_conf)
+
+        factory.removeExchange({
+            "token_a": {"xtz": None},
+            "token_b": {"fa2": (token_b.address, 0)},
+            "index": 0
+        }).send(**send_conf)
+
+        with self.assertRaises(KeyError):
+            factory.storage["pools"][0]()
+        with self.assertRaises(KeyError):
+            factory.storage["pairs"][(
+                {"xtz": None}, {"fa2": (token_b.address, 0)})]()
+
+    def test11_it_removes_an_exchange_threshold_two(self):
+        factory, smak_token, sink, multisig = Env().deploy_full_app()
+        fa2_init_storage = FA2Storage()
+        token_b = Env().deploy_fa2(fa2_init_storage)
+        token_b.mint({"address": ALICE_PK, "amount": 10 ** 6,
+                      "metadata": {}, "token_id": 0}).send(**send_conf)
+        token_b.update_operators([{"add_operator": {
+            "owner": ALICE_PK, "operator": factory.address, "token_id": 0}}]).send(**send_conf)
+        launch_exchange_params = Factory.launch_exchange_params
+        launch_exchange_params["token_type_a"] = {"xtz": None}
+        launch_exchange_params["token_type_b"] = {
+            "fa2": (token_b.address, 0)}
+        launch_exchange_params["token_amount_b"] = {"amount": 10 ** 6}
+        launch_exchange_params["token_amount_a"] = {"mutez": 10 ** 6}
+        factory.launchExchange(
+            launch_exchange_params).with_amount(10 ** 6).send(**send_conf)
+        dex_addr = factory.storage["pools"][0]()
+        multisig.addAdmin(BOB_PK).send(**send_conf)
+        multisig.setThreshold(2).send(**send_conf)
+
+        remove_exchange_param = {
+            "token_a": {"xtz": None},
+            "token_b": {"fa2": (token_b.address, 0)},
+            "index": 0
+        }
+
+        factory.removeExchange(remove_exchange_param).send(**send_conf)
+
+        self.assertEqual(factory.storage["pools"][0](), dex_addr)
+        self.assertEqual(factory.storage["pairs"][(
+            {"xtz": None}, {"fa2": (token_b.address, 0)})](), dex_addr)
+
+        bob_pytezos.contract(factory.address).removeExchange(
+            remove_exchange_param).send(**send_conf)
+
+        with self.assertRaises(KeyError):
+            factory.storage["pools"][0]()
+        with self.assertRaises(KeyError):
+            factory.storage["pairs"][(
+                {"xtz": None}, {"fa2": (token_b.address, 0)})]()

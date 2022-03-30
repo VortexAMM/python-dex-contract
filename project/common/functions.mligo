@@ -8,15 +8,7 @@ let natural_to_mutez (a : nat) : tez = a * 1mutez
 let mutez_to_natural (a: tez) : nat =  a / 1mutez
 
 [@inline]
-let is_a_nat (i : int) : nat option = Michelson.is_nat i
-
-//[@inline]
-//let check_tokens_equal (a : token_type) (b : token_type) =
-//  match (a, b) with
-//  | (Fa12 addr_a, Fa12 addr_b) -> addr_a = addr_b
-//  | (Fa2 (addr_a, i), Fa2 (addr_b, j)) -> addr_a = addr_b && i = j
-//  | (Xtz, Xtz) -> true
-//  | _ -> false
+let is_a_nat (i : int) : nat option = is_nat i
 
 [@inline]
 let get_contract_FA12_transfer (addr : address) : fa12_contract_transfer contract =
@@ -43,8 +35,6 @@ let opt_to_op_list (opt_list : (operation option) list) : operation list =
                 match op with
                 | None -> l
                 | Some o -> o :: l) opt_list ops
-
-
 
 [@inline]
 let make_transfer (opt_id : token_type) (from_addr : address) (to_addr : address) (token_amount : nat) :
@@ -84,5 +74,7 @@ let make_transfer (opt_id : token_type) (from_addr : address) (to_addr : address
                   None
               else
                   Some (Tezos.transaction () (natural_to_mutez token_amount) (get_contract_tez_to to_addr)) 
+
+
 
 #endif

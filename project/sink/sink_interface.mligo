@@ -25,6 +25,13 @@ type claim_param =
 
 type add_exchange_param = sink_add_exchange_param
 
+type remove_exchange_param = sink_remove_exchange_param
+
+
+
+
+
+
 
 type sink_deposit_param = sink_deposit_params
 
@@ -39,3 +46,4 @@ type parameter =
 | Claim of claim_param
 | UpdateClaimLimit of nat
 | AddExchange of add_exchange_param
+| RemoveExchange of remove_exchange_param

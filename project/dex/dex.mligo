@@ -12,6 +12,7 @@
 #include "entrypoints/default.mligo"
 #include "entrypoints/claim_reward.mligo"
 #include "views/get_conversion.mligo"
+#include "views/get_pools.mligo"
 
 
 let main (action, store : parameter * storage) : return =

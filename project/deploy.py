@@ -1,13 +1,17 @@
 from pytezos import pytezos
 from tests.test_env import Env, ALICE_KEY, ALICE_PK, FA12Storage, send_conf
 
-
+# Hangzhounet shell:
 SHELL = "https://rpc.hangzhou.tzstats.com"
+
+# Ithacanet shell:
+# SHELL = "https://rpc.ithaca.tzstats.com"
+
+# Mainnet shell:
+# SHELL = "https://rpc.tzstats.com"
 
 using_params = dict(shell=SHELL, key=ALICE_KEY)
 pytezos = pytezos.using(**using_params)
-
-
 
 
 factory, smak_token, sink = Env(using_params).deploy_full_app()

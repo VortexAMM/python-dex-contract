@@ -1,5 +1,5 @@
 #include "../common/interface.mligo"
-[@inline] let accurancy_multiplier = 1_000_000_000_000n
+
 type a_or_b = A | B
 
 type amounts_and_fees = 

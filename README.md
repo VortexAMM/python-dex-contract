@@ -2,6 +2,29 @@
 
 This is a description of a system composing a Decentralized Exchange (DEX) network.
 
+## User Instructions:
+
+### Smart Contract compilation:
+
+To compile all contracts, enter the `project` folder, and use the command `./compile.sh`.
+
+### Testing 
+
+To run the tests, follow these steps: 
+- make sure all contracts are compiled.
+- run `docker-compose up -d` from the root folder of the project (the `project` folder). 
+- run the command `python3 -m unittest *test_module*`, in which *test_module* is one of the following:
+- - `test_env`  
+- - `test_factory`
+- - `test_dex`
+- - `test_sink`
+
+### Deployment:
+
+To deploy the contracts, first choose the network you want to deploy to:
+At file `project/deploy.py`, lines 4-11, make sure that only the line including the shell for your wanted network is uncommented.
+From the `project` folder, run `python3 deploy.py`.
+
 ## System Architecture
 
 The system is comprised of the following smart-contracts, which interact with each other.

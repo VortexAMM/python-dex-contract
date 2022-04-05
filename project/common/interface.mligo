@@ -1,6 +1,7 @@
 #if !COMMON_INTERFACE
 #define COMMON_INTERFACE
-[@inline] let voting_period = 2592000
+//[@inline] let voting_period = 2592000
+[@inline] let accurancy_multiplier = 1_000_000_000_000n
 
 type token_id = nat
 
@@ -165,7 +166,8 @@ type dex_storage =
     reward_per_sec : nat; 
     last_update_time : timestamp; 
     period_finish : timestamp;
-    user_rewards : (address, user_reward_info) big_map; 
+    user_rewards : (address, user_reward_info) big_map;
+    conversion_ratio : nat;
 }
 
 type get_dex_address_param =

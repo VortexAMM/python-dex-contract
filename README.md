@@ -1,4 +1,4 @@
-# Dcentralized Exchange Contracts
+# Decentralized Exchange Contracts
 
 This is a description of a system composing a Decentralized Exchange (DEX) network.
 

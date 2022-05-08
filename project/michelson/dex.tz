@@ -21,7 +21,7 @@
                        (nat %min_tokens_bought)
                        (bool %a_to_b)
                        (timestamp %deadline))
-                    (address %upadteSinkAddress))))
+                    (address %updateSinkAddress))))
         (or (unit %updateTokenPool)
             (or %updateTokenPoolInternal
                (or (or (nat %fA12InternalA) (nat %fA12InternalB))
@@ -330,7 +330,7 @@
                                                             IF_NONE { PUSH nat 208 ; FAILWITH } {} ;
                                                             SWAP ;
                                                             VIEW "balance_of_view" nat ;
-                                                            IF_NONE { PUSH string "View returned an error" ; FAILWITH } {} ;
+                                                            IF_NONE { PUSH nat 218 ; FAILWITH } {} ;
                                                             DIG 5 ;
                                                             SWAP ;
                                                             DUP ;
@@ -866,7 +866,7 @@
                                         DUG 2 ;
                                         COMPARE ;
                                         LT ;
-                                        IF { DROP 5 ; PUSH nat 211 ; FAILWITH }
+                                        IF { DROP 5 ; PUSH nat 219 ; FAILWITH }
                                            { DUP 4 ;
                                              DUP 6 ;
                                              GET 15 ;
@@ -1047,7 +1047,7 @@
                                                   IF_NONE { PUSH nat 208 ; FAILWITH } {} ;
                                                   SWAP ;
                                                   VIEW "balance_of_view" nat ;
-                                                  IF_NONE { PUSH string "View returned an error" ; FAILWITH } {} ;
+                                                  IF_NONE { PUSH nat 218 ; FAILWITH } {} ;
                                                   DIG 5 ;
                                                   SWAP ;
                                                   DUP ;
@@ -1218,7 +1218,7 @@
                               AMOUNT ;
                               COMPARE ;
                               NEQ ;
-                              IF { DROP 2 ; PUSH nat 235 ; FAILWITH }
+                              IF { DROP 2 ; PUSH nat 231 ; FAILWITH }
                                  { SWAP ;
                                    DUP ;
                                    DUG 2 ;
@@ -2233,6 +2233,31 @@
                    { DROP 3 ; PUSH bool False ; UPDATE 1 } ;
                  NIL operation ;
                  PAIR } } } ;
+  view "get_tokens"
+       unit
+       (pair (pair (or (or (address %fa12) (pair %fa2 address nat)) (unit %xtz))
+                   (or (or (address %fa12) (pair %fa2 address nat)) (unit %xtz)))
+             address)
+       { CDR ;
+         DUP ;
+         GET 13 ;
+         IF_NONE
+           { DROP ; PUSH nat 208 ; FAILWITH }
+           { SWAP ; DUP ; DUG 2 ; GET 9 ; DIG 2 ; GET 7 ; PAIR ; PAIR } } ;
+  view "get_pools"
+       unit
+       (pair (pair nat nat) nat)
+       { CDR ;
+         DUP ;
+         GET 5 ;
+         SWAP ;
+         DUP ;
+         DUG 2 ;
+         GET 3 ;
+         DIG 2 ;
+         GET 15 ;
+         PAIR ;
+         PAIR } ;
   view "get_conversion"
        (pair (bool %direction) (nat %input_amount))
        nat

@@ -18,22 +18,6 @@ let external_swap (dex_address : address) (t : dex_swap_param) (xtz_to_send : te
 
 
 [@inline]
-let check_burn_param (burn_param : sink_burn_param) : unit =
-  if burn_param.to_burn = 0n then 
-    (failwith error_TOKEN_TO_SWAP_AND_BURN_IS_ZERO : unit)
-  else if 
-    Tezos.now > burn_param.deadline then 
-      (failwith error_TIME_IS_PASSED : unit)
-  else ()
-
-[@inline]
-let check_tezos_amount_is_zero () : unit =
-  if Tezos.amount <> 0mutez then
-    failwith error_NO_AMOUNT_TO_BE_SENT
-  else ()
-
-
-[@inline]
 let external_update_operators_fa2 (fa2_addr : address) (operator_updates : operator_update list) : operation =
   let fa2 : operator_update list contract =
     match (Tezos.get_entrypoint_opt "%update_operators" fa2_addr : operator_update list contract option) with

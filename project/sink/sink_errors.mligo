@@ -1,20 +1,20 @@
 [@inline] let error_DEX_MUST_HAVE_SWAP_ENTRYPOINT = 300n
-[@inline] let error_TOKEN_TO_SWAP_AND_BURN_IS_ZERO = 301n
-[@inline] let error_TIME_IS_PASSED = 302n
-[@inline] let error_NO_POOL_WITH_SMAK_PAIR_IN_FACTORY = 303n
+(* 301n *)
+(* 302n *)
+(* 303n *)
 [@inline] let error_FA2_CONTRACT_MUST_HAVE_UPDATE_OPERATORS_ENTRYPOINT = 304n
 [@inline] let error_FA12_CONTRACT_MUST_HAVE_APPROVE_ENTRYPOINT = 305n
 [@inline] let error_FA12_CONTRACT_MUST_HAVE_A_TRANSFER_ENTRYPOINT = 306n
 [@inline] let error_FA2_CONTRACT_MUST_HAVE_A_TRANSFER_ENTRYPOINT = 307n
 [@inline] let error_NO_UNIT_CONTRACT = 308n
-[@inline] let error_NO_AMOUNT_TO_BE_SENT = 309n
-[@inline] let error_ONLY_FACTORY_DEX_CAN_CALL = 310n
-[@inline] let error_REWARD_CONTRACT_HAS_NO_RECEIVE_ENTRYPOINT = 311n
-[@inline] let error_TOKEN_NOT_LISTED = 312n
+(* 309n *)
+(* 310n *)
+(* 311n *)
+(* 312n *)
 [@inline] let error_TOKEN_TO_BURN_NOT_LISTED = 313n
 [@inline] let error_TOKEN_TO_RESERVE_NOT_LISTED = 314n
-[@inline] let error_NO_DEX_EXISTS_IN_FACTORY = 315n
-[@inline] let error_ONLY_FACTORY_CAN_SET_OPERATOR = 316n
+(* 315n *)
+(* 316n *)
 [@inline] let error_TOKEN_LIST_TOO_LARGE = 317n
 [@inline] let error_ONLY_FACTORY_CAN_SET_CLAIM_LIMIT = 318n
 [@inline] let error_ONLY_FACTORY_CAN_ADD_EXCHANGE = 319n
@@ -23,6 +23,6 @@
 [@inline] let error_ONLY_EXCHANGES_CAN_DEPOSIT = 323n
 [@inline] let error_TOKEN_LIST_EMPTY = 324n
 [@inline] let error_EXCHANGE_NOT_LISTED = 325n
-[@inline] let error_NO_CLAIM_ENTRYPOINT = 326n
+(* 326n *)
 [@inline] let error_ADDRESS_SUPPLIED_BY_FACTORY_NOT_IN_STORAGE = 327n
 [@inline] let error_ONLY_FACTORY_CAN_REMOVE_EXCHANGE = 328n

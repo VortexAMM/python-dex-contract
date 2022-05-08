@@ -18,25 +18,25 @@ let remove_exchange (param : remove_exchange_param) (store : storage) : return =
                 let reverse_dex =
                     match Big_map.find_opt (token_b, token_a) store.pairs with
                     | None ->
-                        (failwith(error_EXCHANGE_NOT_IN_PAIRS) : address)
+                        (failwith(error_EXCHANGE_NOT_IN_PAIRS) : address) // 136
                     | Some rev_addr -> rev_addr in
                 (Big_map.update (token_b, token_a) (None : address option) store.pairs, reverse_dex, (token_b, token_a)) in
         let pools =
             match Big_map.find_opt index store.pools with
             | None ->
-                (failwith(error_EXCHANGE_NOT_IN_POOLS) : (nat, address) big_map)
+                (failwith(error_EXCHANGE_NOT_IN_POOLS) : (nat, address) big_map) // 137
             | Some addr ->
                 if addr <> dex_address then
-                    (failwith(error_INDEX_NOT_MATCHING_TOKENS) : (nat, address) big_map)
+                    (failwith(error_INDEX_NOT_MATCHING_TOKENS) : (nat, address) big_map) // 138
                 else
                     Big_map.update index (None : address option) store.pools in
         let sink =
             match store.default_sink with
-            | None -> (failwith(error_SINK_CONTRACT_HAS_NOT_YET_DEPLOYED) : address)
+            | None -> (failwith(error_SINK_CONTRACT_HAS_NOT_YET_DEPLOYED) : address) // 104
             | Some addr -> addr in
         let sink_remove_exchange =
             match (Tezos.get_entrypoint_opt "%removeExchange" sink : sink_remove_exchange_param contract option) with
-            | None -> (failwith(error_SINK_HAS_NO_REMOVE_EXCHANGE) : sink_remove_exchange_param contract)
+            | None -> (failwith(error_SINK_HAS_NO_REMOVE_EXCHANGE) : sink_remove_exchange_param contract) // 139
             | Some contr -> contr in
         let sink_remove_exchange_param =
         {

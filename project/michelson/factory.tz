@@ -44,11 +44,6 @@
              (unit %xtz))
           (address %default_reserve)
           (option %default_sink address)
-          (big_map %default_lp_metadata string bytes)
-          (big_map %default_lp_allowances (pair (address %owner) (address %spender)) nat)
-          (big_map %default_lp_token_metadata
-             nat
-             (pair (nat %token_id) (map %token_info string bytes)))
           (key_hash %default_baker)
           (nat %default_reward_rate)
           (nat %default_claim_limit)
@@ -113,7 +108,7 @@
                                        DUP 4 ;
                                        COMPARE ;
                                        NEQ ;
-                                       IF {} { DROP ; PUSH nat 123 ; FAILWITH } }
+                                       IF {} { DROP ; PUSH nat 142 ; FAILWITH } }
                                      { UNIT ;
                                        RIGHT (or address (pair address nat)) ;
                                        DUP 4 ;
@@ -131,7 +126,7 @@
                                             COMPARE ;
                                             NEQ ;
                                             IF { DROP ; PUSH nat 132 ; FAILWITH } {} }
-                                          { DROP ; PUSH nat 122 ; FAILWITH } } ;
+                                          { DROP ; PUSH nat 141 ; FAILWITH } } ;
                                    DUP 5 ;
                                    GET 7 ;
                                    IF_LEFT
@@ -140,7 +135,7 @@
                                        DUP 4 ;
                                        COMPARE ;
                                        NEQ ;
-                                       IF {} { DROP ; PUSH nat 123 ; FAILWITH } }
+                                       IF {} { DROP ; PUSH nat 144 ; FAILWITH } }
                                      { UNIT ;
                                        RIGHT (or address (pair address nat)) ;
                                        DUP 4 ;
@@ -158,7 +153,7 @@
                                             COMPARE ;
                                             NEQ ;
                                             IF { DROP ; PUSH nat 132 ; FAILWITH } {} }
-                                          { DROP ; PUSH nat 122 ; FAILWITH } } ;
+                                          { DROP ; PUSH nat 143 ; FAILWITH } } ;
                                    PUSH nat 0 ;
                                    SWAP ;
                                    DUP ;
@@ -239,7 +234,7 @@
                                                   NEQ ;
                                                   IF { PUSH nat 1 } { PUSH nat 0 } } ;
                                              DUP 8 ;
-                                             GET 23 ;
+                                             GET 17 ;
                                              NOW ;
                                              NOW ;
                                              PUSH nat 0 ;
@@ -248,7 +243,7 @@
                                              PUSH nat 0 ;
                                              PUSH nat 0 ;
                                              DUP 16 ;
-                                             GET 19 ;
+                                             GET 13 ;
                                              DUP 15 ;
                                              PUSH bool False ;
                                              SELF_ADDRESS ;
@@ -295,7 +290,7 @@
                                                                       (nat %min_tokens_bought)
                                                                       (bool %a_to_b)
                                                                       (timestamp %deadline))
-                                                                   (address %upadteSinkAddress))))
+                                                                   (address %updateSinkAddress))))
                                                        (or (unit %updateTokenPool)
                                                            (or %updateTokenPoolInternal
                                                               (or (or (nat %fA12InternalA) (nat %fA12InternalB))
@@ -604,7 +599,7 @@
                                                                                                            IF_NONE { PUSH nat 208 ; FAILWITH } {} ;
                                                                                                            SWAP ;
                                                                                                            VIEW "balance_of_view" nat ;
-                                                                                                           IF_NONE { PUSH string "View returned an error" ; FAILWITH } {} ;
+                                                                                                           IF_NONE { PUSH nat 218 ; FAILWITH } {} ;
                                                                                                            DIG 5 ;
                                                                                                            SWAP ;
                                                                                                            DUP ;
@@ -1140,7 +1135,7 @@
                                                                                        DUG 2 ;
                                                                                        COMPARE ;
                                                                                        LT ;
-                                                                                       IF { DROP 5 ; PUSH nat 211 ; FAILWITH }
+                                                                                       IF { DROP 5 ; PUSH nat 219 ; FAILWITH }
                                                                                           { DUP 4 ;
                                                                                             DUP 6 ;
                                                                                             GET 15 ;
@@ -1321,7 +1316,7 @@
                                                                                                  IF_NONE { PUSH nat 208 ; FAILWITH } {} ;
                                                                                                  SWAP ;
                                                                                                  VIEW "balance_of_view" nat ;
-                                                                                                 IF_NONE { PUSH string "View returned an error" ; FAILWITH } {} ;
+                                                                                                 IF_NONE { PUSH nat 218 ; FAILWITH } {} ;
                                                                                                  DIG 5 ;
                                                                                                  SWAP ;
                                                                                                  DUP ;
@@ -1492,7 +1487,7 @@
                                                                              AMOUNT ;
                                                                              COMPARE ;
                                                                              NEQ ;
-                                                                             IF { DROP 2 ; PUSH nat 235 ; FAILWITH }
+                                                                             IF { DROP 2 ; PUSH nat 231 ; FAILWITH }
                                                                                 { SWAP ;
                                                                                   DUP ;
                                                                                   DUG 2 ;
@@ -2507,6 +2502,31 @@
                                                                   { DROP 3 ; PUSH bool False ; UPDATE 1 } ;
                                                                 NIL operation ;
                                                                 PAIR } } } ;
+                                                 view "get_tokens"
+                                                      unit
+                                                      (pair (pair (or (or (address %fa12) (pair %fa2 address nat)) (unit %xtz))
+                                                                  (or (or (address %fa12) (pair %fa2 address nat)) (unit %xtz)))
+                                                            address)
+                                                      { CDR ;
+                                                        DUP ;
+                                                        GET 13 ;
+                                                        IF_NONE
+                                                          { DROP ; PUSH nat 208 ; FAILWITH }
+                                                          { SWAP ; DUP ; DUG 2 ; GET 9 ; DIG 2 ; GET 7 ; PAIR ; PAIR } } ;
+                                                 view "get_pools"
+                                                      unit
+                                                      (pair (pair nat nat) nat)
+                                                      { CDR ;
+                                                        DUP ;
+                                                        GET 5 ;
+                                                        SWAP ;
+                                                        DUP ;
+                                                        DUG 2 ;
+                                                        GET 3 ;
+                                                        DIG 2 ;
+                                                        GET 15 ;
+                                                        PAIR ;
+                                                        PAIR } ;
                                                  view "get_conversion"
                                                       (pair (bool %direction) (nat %input_amount))
                                                       nat
@@ -2828,8 +2848,7 @@
                                              SWAP ;
                                              DUP 5 ;
                                              DUP 5 ;
-                                             DUP 13 ;
-                                             GET 13 ;
+                                             EMPTY_BIG_MAP (pair address address) nat ;
                                              EMPTY_BIG_MAP address nat ;
                                              DIG 8 ;
                                              SOME ;
@@ -3092,7 +3111,7 @@
                                              DUP 5 ;
                                              SOME ;
                                              DUP 12 ;
-                                             GET 25 ;
+                                             GET 19 ;
                                              UPDATE ;
                                              UPDATE 3 ;
                                              DUP 10 ;
@@ -3106,9 +3125,9 @@
                                              UPDATE 1 ;
                                              PUSH nat 1 ;
                                              DUP 11 ;
-                                             GET 25 ;
+                                             GET 19 ;
                                              ADD ;
-                                             UPDATE 25 ;
+                                             UPDATE 19 ;
                                              DIG 5 ;
                                              DUP 5 ;
                                              SENDER ;
@@ -3213,7 +3232,7 @@
                                                          IF_LEFT
                                                            { DROP ; NONE key_hash ; PUSH bool True ; PAIR }
                                                            { DROP ; NONE key_hash ; PUSH bool True ; PAIR } }
-                                                       { DROP ; DIG 9 ; GET 17 ; SOME ; PUSH bool False ; PAIR } }
+                                                       { DROP ; DIG 9 ; GET 11 ; SOME ; PUSH bool False ; PAIR } }
                                                    { DROP ;
                                                      IF_LEFT
                                                        { DIG 10 ;
@@ -3221,8 +3240,8 @@
                                                          IF_LEFT
                                                            { DROP ; NONE key_hash ; PUSH bool True ; PAIR }
                                                            { DROP ; NONE key_hash ; PUSH bool True ; PAIR } }
-                                                       { DROP ; DIG 9 ; GET 17 ; SOME ; PUSH bool False ; PAIR } } }
-                                               { DROP 2 ; DIG 9 ; GET 17 ; SOME ; PUSH bool False ; PAIR } ;
+                                                       { DROP ; DIG 9 ; GET 11 ; SOME ; PUSH bool False ; PAIR } } }
+                                               { DROP 2 ; DIG 9 ; GET 11 ; SOME ; PUSH bool False ; PAIR } ;
                                              UNPAIR ;
                                              DIG 2 ;
                                              PUSH mutez 0 ;
@@ -3256,14 +3275,14 @@
                                              PAIR } } } } }
                        { DROP ;
                          DUP ;
-                         GET 26 ;
+                         GET 20 ;
                          SENDER ;
                          COMPARE ;
                          NEQ ;
                          IF { SELF_ADDRESS ;
                               SWAP ;
                               DUP ;
-                              GET 26 ;
+                              GET 20 ;
                               CONTRACT %callMultisig
                                 (pair (pair %entrypoint_signature
                                          (pair (string %name) (bytes %params))
@@ -3306,7 +3325,7 @@
                                   SWAP ;
                                   DUP ;
                                   DUG 2 ;
-                                  GET 21 ;
+                                  GET 15 ;
                                   DUP 3 ;
                                   GET 7 ;
                                   EMPTY_BIG_MAP (or (or address (pair address nat)) unit) nat ;
@@ -3685,14 +3704,14 @@
                        { SWAP ;
                          DUP ;
                          DUG 2 ;
-                         GET 26 ;
+                         GET 20 ;
                          SENDER ;
                          COMPARE ;
                          NEQ ;
                          IF { SELF_ADDRESS ;
                               DIG 2 ;
                               DUP ;
-                              GET 26 ;
+                              GET 20 ;
                               CONTRACT %callMultisig
                                 (pair (pair %entrypoint_signature
                                          (pair (string %name) (bytes %params))
@@ -3862,14 +3881,14 @@
                        { SWAP ;
                          DUP ;
                          DUG 2 ;
-                         GET 26 ;
+                         GET 20 ;
                          SENDER ;
                          COMPARE ;
                          NEQ ;
                          IF { SELF_ADDRESS ;
                               DIG 2 ;
                               DUP ;
-                              GET 26 ;
+                              GET 20 ;
                               CONTRACT %callMultisig
                                 (pair (pair %entrypoint_signature
                                          (pair (string %name) (bytes %params))
@@ -3881,7 +3900,7 @@
                                   DUP 5 ;
                                   PACK ;
                                   SHA256 ;
-                                  PUSH string "setClaimLimit" ;
+                                  PUSH string "setSinkClaimLimit" ;
                                   PAIR ;
                                   PAIR ;
                                   SWAP ;
@@ -3894,9 +3913,9 @@
                                     (list operation)
                                     { CAR ;
                                       UNPAIR ;
-                                      CONTRACT %setClaimLimit nat ;
+                                      CONTRACT %setSinkClaimLimit nat ;
                                       IF_NONE
-                                        { DROP ; PUSH string "no setClaimLimit entrypoint" ; FAILWITH }
+                                        { DROP ; PUSH string "no setSinkClaimLimit entrypoint" ; FAILWITH }
                                         { NIL operation ; SWAP ; PUSH mutez 0 ; DIG 3 ; TRANSFER_TOKENS ; CONS } } ;
                                   SWAP ;
                                   APPLY ;
@@ -3918,7 +3937,7 @@
                               DUP 3 ;
                               TRANSFER_TOKENS ;
                               DUG 2 ;
-                              UPDATE 21 ;
+                              UPDATE 15 ;
                               NIL operation ;
                               DIG 2 ;
                               CONS ;
@@ -3927,14 +3946,14 @@
                        { SWAP ;
                          DUP ;
                          DUG 2 ;
-                         GET 26 ;
+                         GET 20 ;
                          SENDER ;
                          COMPARE ;
                          NEQ ;
                          IF { SELF_ADDRESS ;
                               DIG 2 ;
                               DUP ;
-                              GET 26 ;
+                              GET 20 ;
                               CONTRACT %callMultisig
                                 (pair (pair %entrypoint_signature
                                          (pair (string %name) (bytes %params))
@@ -3975,13 +3994,13 @@
                               PAIR }
                             { UNPAIR 3 ;
                               DUP 4 ;
-                              GET 25 ;
+                              GET 19 ;
                               DUP 4 ;
                               DUP 4 ;
                               ADD ;
                               COMPARE ;
                               GT ;
-                              IF { DIG 2 ; DROP ; DUP 3 ; GET 25 } { DUG 2 ; DUP ; DUG 3 ; ADD } ;
+                              IF { DIG 2 ; DROP ; DUP 3 ; GET 19 } { DUG 2 ; DUP ; DUG 3 ; ADD } ;
                               DUP 4 ;
                               NIL operation ;
                               DUP 4 ;
@@ -4015,9 +4034,6 @@
                                                      (or (or address (pair address nat)) unit)
                                                      address
                                                      (option address)
-                                                     (big_map string bytes)
-                                                     (big_map (pair address address) nat)
-                                                     (big_map nat (pair nat (map string bytes)))
                                                      key_hash
                                                      nat
                                                      nat
@@ -4053,20 +4069,20 @@
                                        PAIR 5 ;
                                        LEFT (list operation) } } ;
                               DUG 2 ;
-                              UPDATE 17 ;
+                              UPDATE 11 ;
                               SWAP ;
                               PAIR } }
                        { SWAP ;
                          DUP ;
                          DUG 2 ;
-                         GET 26 ;
+                         GET 20 ;
                          SENDER ;
                          COMPARE ;
                          NEQ ;
                          IF { SELF_ADDRESS ;
                               DIG 2 ;
                               DUP ;
-                              GET 26 ;
+                              GET 20 ;
                               CONTRACT %callMultisig
                                 (pair (pair %entrypoint_signature
                                          (pair (string %name) (bytes %params))
@@ -4104,18 +4120,18 @@
                                   SWAP ;
                                   CONS } ;
                               PAIR }
-                            { UPDATE 26 ; NIL operation ; PAIR } } } } }
+                            { UPDATE 20 ; NIL operation ; PAIR } } } } }
            { SWAP ;
              DUP ;
              DUG 2 ;
-             GET 26 ;
+             GET 20 ;
              SENDER ;
              COMPARE ;
              NEQ ;
              IF { SELF_ADDRESS ;
                   DIG 2 ;
                   DUP ;
-                  GET 26 ;
+                  GET 20 ;
                   CONTRACT %callMultisig
                     (pair (pair %entrypoint_signature
                              (pair (string %name) (bytes %params))
@@ -4156,7 +4172,7 @@
                   PAIR }
                 { UNPAIR 3 ;
                   DUP 4 ;
-                  GET 25 ;
+                  GET 19 ;
                   SWAP ;
                   DUP ;
                   DUG 2 ;
@@ -4202,9 +4218,6 @@
                                               (or (or address (pair address nat)) unit)
                                               address
                                               (option address)
-                                              (big_map string bytes)
-                                              (big_map (pair address address) nat)
-                                              (big_map nat (pair nat (map string bytes)))
                                               key_hash
                                               nat
                                               nat
@@ -4218,19 +4231,45 @@
                                 DUG 2 ;
                                 GET ;
                                 IF_NONE { PUSH nat 130 ; FAILWITH } {} ;
+                                DUP ;
                                 CONTRACT %updateSinkAddress address ;
                                 IF_NONE { PUSH nat 131 ; FAILWITH } {} ;
-                                DIG 4 ;
+                                DIG 5 ;
                                 SWAP ;
                                 PUSH mutez 0 ;
-                                DUP 6 ;
+                                DUP 7 ;
                                 TRANSFER_TOKENS ;
                                 CONS ;
+                                SWAP ;
+                                DUP ;
+                                DUG 2 ;
+                                UNIT ;
+                                VIEW "get_tokens"
+                                     (pair (pair (or (or (address %fa12) (pair %fa2 address nat)) (unit %xtz))
+                                                 (or (or (address %fa12) (pair %fa2 address nat)) (unit %xtz)))
+                                           address) ;
+                                IF_NONE { PUSH nat 122 ; FAILWITH } {} ;
+                                CAR ;
+                                UNPAIR ;
+                                DUP 7 ;
+                                CONTRACT %addExchange
+                                  (pair (address %dex_address)
+                                        (or %token_a (or (address %fa12) (pair %fa2 address nat)) (unit %xtz))
+                                        (or %token_b (or (address %fa12) (pair %fa2 address nat)) (unit %xtz))) ;
+                                IF_NONE { PUSH nat 124 ; FAILWITH } {} ;
+                                PUSH mutez 0 ;
+                                DIG 3 ;
+                                DIG 3 ;
+                                DIG 5 ;
+                                PAIR 3 ;
+                                TRANSFER_TOKENS ;
                                 PUSH nat 1 ;
-                                DIG 2 ;
+                                DIG 3 ;
                                 ADD ;
-                                DIG 4 ;
-                                DIG 2 ;
+                                DIG 5 ;
+                                DIG 3 ;
+                                DIG 3 ;
+                                CONS ;
                                 DIG 4 ;
                                 DIG 4 ;
                                 DIG 4 ;
@@ -4241,6 +4280,15 @@
                        UPDATE 9 ;
                        SWAP ;
                        PAIR } } } } ;
+  view "get_dex_by_index"
+       nat
+       address
+       { UNPAIR ;
+         SWAP ;
+         GET 3 ;
+         SWAP ;
+         GET ;
+         IF_NONE { PUSH nat 140 ; FAILWITH } {} } ;
   view "get_dex_address"
        (pair (or %a_type (or (address %fa12) (pair %fa2 address nat)) (unit %xtz))
              (or %b_type (or (address %fa12) (pair %fa2 address nat)) (unit %xtz)))

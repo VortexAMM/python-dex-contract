@@ -10,7 +10,7 @@ let launch_sink (store : storage) : return =
         (prepare_multisig "launchSink" () func store), store
   else
     match store.default_sink with
-    | Some _ -> (failwith error_SINK_CONTRAT_HAS_ALREADY_BEEN_DEPLOYED : return)
+    | Some _ -> (failwith error_SINK_CONTRAT_HAS_ALREADY_BEEN_DEPLOYED : return) // 112
     | None ->
       let init_store_sink : sink_storage =
         {

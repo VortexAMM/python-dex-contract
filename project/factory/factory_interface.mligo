@@ -8,9 +8,6 @@ type storage =
     default_smak_token_type : token_type;
     default_reserve : address;
     default_sink : address option;
-    default_lp_metadata : (string, bytes) big_map ;
-    default_lp_allowances: (allowance_key, nat) big_map ;
-    default_lp_token_metadata: (nat, token_metadata_entry) big_map ;
     default_baker : key_hash;
     default_reward_rate : nat;
     default_claim_limit : nat;

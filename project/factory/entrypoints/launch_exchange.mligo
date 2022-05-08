@@ -1,53 +1,53 @@
 let launch_exchange(param : launch_exchange_params) (store : storage) : return =
     let sink_addr =
         match store.default_sink with
-        | None -> (failwith error_SINK_CONTRACT_HAS_NOT_YET_DEPLOYED : address)
+        | None -> (failwith error_SINK_CONTRACT_HAS_NOT_YET_DEPLOYED : address) // 104
         | Some sink_addr -> sink_addr in
     let token_a = param.token_type_a in
     let token_b = param.token_type_b in
 
     if check_tokens_equal token_a token_b then
-        (failwith error_TOKENS_ARE_EQUAL : return)
+        (failwith error_TOKENS_ARE_EQUAL : return) // 101
     else if 
         Big_map.mem (token_a, token_b) store.pairs ||
         Big_map.mem (token_b, token_a) store.pairs then
-        (failwith error_PAIR_ALREADY_EXISTS : return)
+        (failwith error_PAIR_ALREADY_EXISTS : return) // 102
     else
         let token_amount_a = 
             match param.token_amount_a with
             | Mutez p -> 
                 if token_a = Xtz then
                     if p <> mutez_to_natural Tezos.amount then
-                        (failwith(error_MUTEZ_AMOUNT_SHOULD_BE_EQUAL_TO_AMOUNT_SENT) : nat)
+                        (failwith(error_MUTEZ_AMOUNT_SHOULD_BE_EQUAL_TO_AMOUNT_SENT) : nat) // 132
                     else
                         p
-                else (failwith(error_NO_XTZ_AMOUNT_TO_BE_SENT) : nat)
+                else (failwith(error_TOKEN_AMOUNT_A_SHOULD_BE_AMOUNT) : nat) // 141
             | Amount p ->
                 if token_a <> Xtz then
                     p
                 else
-                    (failwith(error_XTZ_AMOUNT_SHOULD_BE_SENT) : nat)
+                    (failwith(error_TOKEN_AMOUNT_A_SHOULD_BE_MUTEZ) : nat) // 142
             in
         let token_amount_b =
             match param.token_amount_b with
             | Mutez p -> 
                 if token_b = Xtz then
                     if p <> mutez_to_natural Tezos.amount then
-                        (failwith(error_MUTEZ_AMOUNT_SHOULD_BE_EQUAL_TO_AMOUNT_SENT) : nat)
+                        (failwith(error_MUTEZ_AMOUNT_SHOULD_BE_EQUAL_TO_AMOUNT_SENT) : nat) // 132
                     else
                         p
-                else (failwith(error_NO_XTZ_AMOUNT_TO_BE_SENT) : nat)
+                else (failwith(error_TOKEN_AMOUNT_B_SHOULD_BE_AMOUNT) : nat) // 143
             | Amount p -> 
                 if token_b <> Xtz then
                     p
                 else
-                    (failwith(error_XTZ_AMOUNT_SHOULD_BE_SENT) : nat)
+                    (failwith(error_TOKEN_AMOUNT_B_SHOULD_BE_MUTEZ) : nat) // 144
             in 
         if token_amount_a = 0n || token_amount_b = 0n then
-            (failwith error_POOLS_CAN_NOT_BE_EMPTY : return)
+            (failwith error_POOLS_CAN_NOT_BE_EMPTY : return) // 103
         else
             if param.curve = Flat && token_amount_a <> token_amount_b then
-                (failwith(error_FLAT_CURVE_EXCHANGE_SHOULD_HAVE_EQUAL_POOLS) : return)
+                (failwith(error_FLAT_CURVE_EXCHANGE_SHOULD_HAVE_EQUAL_POOLS) : return) // 128
             else
                 let initial_lqt_total = sqrt (token_amount_a * token_amount_b) in
 
@@ -67,6 +67,7 @@ let launch_exchange(param : launch_exchange_params) (store : storage) : return =
                     manager = Tezos.self_address;
                     freeze_baker = false;
                     sink = sink_addr;
+                    sink_reward_rate = store.default_reward_rate;
                     reward = 0n; 
                     total_reward = 0n; 
                     reward_paid = 0n; 
@@ -75,7 +76,6 @@ let launch_exchange(param : launch_exchange_params) (store : storage) : return =
                     last_update_time = Tezos.now; 
                     period_finish = Tezos.now;
                     user_rewards = store.default_user_rewards;
-                    sink_reward_rate = store.default_reward_rate;
                 } in
 
                 let (op_deploy_dex, dex_address) = deploy_dex dex_init_storage in
@@ -112,8 +112,7 @@ let launch_exchange(param : launch_exchange_params) (store : storage) : return =
                     {
                         tokens = 
                             Big_map.literal [(Tezos.sender, initial_lqt_total)];
-                            //Big_map.update Tezos.sender (Some initial_lqt_total) (Big_map.empty : tokens);
-                        allowances = store.default_lp_allowances;
+                        allowances = (Big_map.empty : (allowance_key, nat) big_map);
                         admin = dex_address;
                         total_supply = initial_lqt_total;
                         token_metadata = token_metadata;
@@ -160,7 +159,7 @@ let launch_exchange(param : launch_exchange_params) (store : storage) : return =
                              set_lqt_address_params contract option)
                     with
                     | None ->
-                      (failwith error_SELF_SET_LQT_ADDRESS_DOES_NOT_EXIST : set_lqt_address_params contract)
+                      (failwith error_SELF_SET_LQT_ADDRESS_DOES_NOT_EXIST : set_lqt_address_params contract) // 111 UNREACHABLE
                     | Some contract -> contract in
 
                 let set_lqt_address =
@@ -172,7 +171,7 @@ let launch_exchange(param : launch_exchange_params) (store : storage) : return =
 
                 let set_baker =
                     match (Tezos.get_entrypoint_opt "%setBaker" Tezos.self_address : set_baker_param contract option) with
-                    | None -> (failwith(error_SELF_SET_BAKER_ENTRYPOINT) : set_baker_param contract)
+                    | None -> (failwith(error_SELF_SET_BAKER_ENTRYPOINT) : set_baker_param contract) // 121 UNREACHABLE
                     | Some contr -> contr in
 
                 let (freeze_baker, baker) =
@@ -193,10 +192,9 @@ let launch_exchange(param : launch_exchange_params) (store : storage) : return =
 
                 let ops = op_set_baker :: ops in
 
-
                 let sink_add_exchange =
                     match (Tezos.get_entrypoint_opt "%addExchange" sink_addr : sink_add_exchange_param contract option) with
-                    | None -> (failwith(error_NO_SINK_ADD_EXCHANGE) : sink_add_exchange_param contract)
+                    | None -> (failwith(error_NO_SINK_ADD_EXCHANGE) : sink_add_exchange_param contract) // 124 UNREACHABLE
                     | Some contr -> contr in
                 let sink_add_exchange_param =
                     {

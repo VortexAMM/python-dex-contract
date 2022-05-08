@@ -11,6 +11,7 @@
 #include "entrypoints/update_baker.mligo"
 #include "entrypoints/update_multisig.mligo"
 #include "views/get_dex_address.mligo"
+#include "views/get_dex_by_index.mligo"
 
 let main (action, store : parameter * storage) : return =
 match action with

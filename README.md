@@ -1,4 +1,4 @@
-# Decentralized Exchange Contracts
+# Dcentralized Exchange Contracts
 
 This is a description of a system composing a Decentralized Exchange (DEX) network.
 
@@ -22,8 +22,8 @@ To run the tests, follow these steps:
 ### Deployment:
 
 To deploy the contracts, first choose the network you want to deploy to:
-At file `project/deploy.py`, lines 4-11, make sure that only the line including the shell for your wanted network is uncommented.
-From the `project` folder, run `python3 deploy.py`.
+At file `project/deploy.py`, lines 4-18, make sure that only the line including the `SHELL` and `DEFAULT_BAKER` for your wanted network is uncommented.
+From the `project/tests` folder, run `python3 ../deploy.py`.
 
 ## System Architecture
 
@@ -605,3 +605,105 @@ This entrypoint is used to set a new duration for calls. If this duration is pas
 
 Input parameter:
 `nat` the new duration (in seconds).
+
+
+## Error Codes:
+
+| Code | Thrown by  | Message                                                                                                       |
+|------|------------|---------------------------------------------------------------------------------------------------------------|
+| 101  | Factory    | The two tokens are equal                                                                                      |
+| 102  | Factory    | The pair already exists                                                                                       |
+| 103  | Factory    | Pools cannot be empty                                                                                         |
+| 104  | Factory    | Sink contract was not deployed yet                                                                            |
+| 105  | Factory    | FA1.2 contract has no `transfer` entrypoint (for transfer operations)                                         |
+| 106  | Factory    | FA2 contract has no `transfer` entrypoint (for transfer operations)                                           |
+| 107  | Factory    | Contract is not of type `unit` (for transfer operations)                                                      |
+| 109  | Factory    | Only factory contract can call `setLqtAddress` entrypoint                                                     |
+| 110  | Factory    | DEX contract has no `setLqtAddress` entrypoint                                                                |
+| 111  | Factory    | Factory contract has no `setLqtAddress` entrypoint                                                            |
+| 112  | Factory    | Sink contract has already been deployed                                                                       |
+| 113  | Factory    | The pair of tokens sent to `get_dex_address` is not registered in the factory's `pairs`                       |
+| 119  | Factory    | Only the factory contract can call `setBaker` entrypoint                                                      |
+| 120  | Factory    | DEX contract has no `setBaker` entrypoint                                                                     |
+| 121  | Factory    | Factory contract has no `setBaker` entrypoint                                                                 |
+| 122  | Factory    | DEX contract has no `get_tokens` onchain view                                                                 |
+| 124  | Factory    | Sink contract has no `addExchange` entrypoint                                                                 |
+| 126  | Factory    | Sink contract has no `updateClaimLimit` entrypoint                                                            |
+| 128  | Factory    | A DEX with flat-curve model needs to be deployed with equal pool sizes                                        |
+| 130  | Factory    | Counter sent to `updateSinkAddress` entrypoint is outside the pool count                                      |
+| 131  | Factory    | DEX contract has no `updateSink` entrypoint                                                                   |
+| 132  | Factory    | One of the launched DEX tokens is `xtz` and the `amount` sent at launch is not correct                        |
+| 136  | Factory    | The pair of tokens sent to `removeExchange` entrypoint does not fit any DEX registered                        |
+| 137  | Factory    | The index sent to `removeExchange` entrypoint does not fit any DEX registered                                 |
+| 138  | Factory    | The pair of tokens and the index sent to `removeExchange` entrypoint are of different DEXs                    |
+| 139  | Factory    | Sink contract does not have a `removeExchange` entrypoint                                                     |
+| 140  | Factory    | Index sent tp `get_dex_by_index` onchain view does not fit any DEX registered                                 |
+| 141  | Factory    | `token_amount_a` type should be `amount` (for token sent to `launchExchange` entrypoint)                      |
+| 142  | Factory    | `token_amount_a` type should be `mutez` (for `xtz` sent to `launchExchange entrypoint)                        |
+| 143  | Factory    | `token_amount_b` type should be `amount` (for token sent to `launchExchange` entrypoint)                      |
+| 144  | Factory    | `token_amount_b` type should be `mutez` (for `xtz` sent to `launchExchange entrypoint)                        |
+| 201  | DEX        | `updateTokenPool` operation is in progress                                                                    |
+| 202  | DEX        | Deadline is over for `addLiquidity` request                                                                   |
+| 203  | DEX        | `max_tokens_deposited` sent to `addLiquidity` entrypoint is exceeded                                          |
+| 204  | DEX        | LP tokens minted for LP are less than `min_lqt_minted` sent to `addLiquidity` entrypoint                      |
+| 205  | DEX        | FA1.2 contract has no `transfer` entrypoint (for transfer operations)                                         |
+| 206  | DEX        | FA2 contract has no `transfer` entrypoint (for transfer operations)                                           |
+| 207  | DEX        | Contract is not of type `unit` (for transfer operations)                                                      |
+| 208  | DEX        | `lqt_address` is not set                                                                                      |
+| 209  | DEX        | LP token contract has no `mintOrBurn` entrypoint                                                              |
+| 210  | DEX        | Deadline is over for `removeLiquidity` request                                                                |
+| 211  | DEX        | Amount of `token_a` withdrawn is less than `min_token_a_withdrawn` sent to `removeLiquidity`                  |
+| 212  | DEX        | `lqt_burned` sent to `removeLiquidity` is higher than the DEX's `lqt_total`                                   |
+| 213  | DEX        | Tokens withdrawn by `removeLiquidity` operation is more than the token's pool size                            |
+| 214  | DEX        | Deadline is over for `swap` request                                                                           |
+| 215  | DEX        | The tokens bought by the swap are less than `min_tokens_bought` sent to the `swap` entrypoint                 |
+| 216  | DEX        | Tokens bought at swap are more than the token's pool size                                                     |
+| 217  | DEX        | Incorrect `amount` was sent to `addLiquidity` entrypoint                                                      |
+| 218  | DEX        | The LP token's `balance_of_view` returned an error                                                            |
+| 219  | DEX        | Amount of `token_b` withdrawn is less than `min_token_b_withdrawn` sent to `removeLiquidity`                  |
+| 220  | DEX        | Only the `manager` can call `setLqtAddress` entrypoint                                                        |
+| 222  | DEX        | Non existing entrypoint FA2 (for `update_token_pool` operation)                                               |
+| 223  | DEX        | Non existing entrypoint FA1.2 (for `update_token_pool` operation)                                             |
+| 224  | DEX        | Invalid FA2 token contract missing `balance_of` (for `update_token_pool` operation)                           |
+| 225  | DEX        | Invalid FA1.2 token contract missing `get_balance` (for `update_token_pool` operation)                        |
+| 226  | DEX        | Invalid FA2 balance response (for `update_token_pool` operation)                                              |
+| 227  | DEX        | `update_token_ended` function not found in DEX contract (for `update_token_pool` operation)                   |
+| 228  | DEX        | Call not from an implicit account (for `update_token_pool` operation)                                         |
+| 229  | DEX        | `self_is_updating_token_pool` must be false to call entrypoint                                                |
+| 230  | DEX        | This entrypoint may be called only by `get_balance` of the token contract (for `update_token_pool` operation) |
+| 231  | DEX        | No amount to be sent                                                                                          |
+| 232  | DEX        | Only `manager` can update the sink's address                                                                  |
+| 233  | DEX        | Only `manager` can set baker                                                                                  |
+| 234  | DEX        | Baker is pemanently frozen                                                                                    |
+| 238  | DEX        | Amount must be sent                                                                                           |
+| 239  | DEX        | Sink contract has no `deposit` entrypoint                                                                     |
+| 249  | DEX        | User's LP token balance is not enough for `removeLiquidity` operation                                         |
+| 250  | DEX        | User's baker reward is larger than the contract's balance                                                     |
+| 251  | DEX        | No baker rewards for this DEX                                                                                 |
+| 300  | Sink       | DEX contract has no `swap` entrypoint                                                                         |
+| 304  | Sink       | FA2 contract has no `updateOperators` entrypoint                                                              |
+| 305  | Sink       | FA1.2 contract has no `approve` entrypoint                                                                    |
+| 306  | Sink       | FA1.2 contract has no `transfer` entrypoint                                                                   |
+| 307  | Sink       | FA2 contract has no `transfer` entrypoint                                                                     |
+| 308  | Sink       | No `unit` contract found                                                                                      |
+| 313  | Sink       | Token to burn is not listed                                                                                   |
+| 314  | Sink       | Token to reserve is not listed                                                                                |
+| 317  | Sink       | Token list is larger than `claim_limit`                                                                       |
+| 318  | Sink       | Only Factory contract can call `updateClaimLimit` entrypoint                                                  |
+| 319  | Sink       | Only Factory contract can call `addExchange` entrypoint                                                       |
+| 320  | Sink       | No smak-to-token exchange exists                                                                              |
+| 321  | Sink       | Token pair does not exist in the contract's `exchanges`                                                       |
+| 322  | Sink       | Only a listed DEX contract can deposit tokens                                                                 |
+| 323  | Sink       | Empty token list was sent to claim                                                                            |
+| 324  | Sink       | Exchange to remove is not listed                                                                              |
+| 327  | Sink       | Token pair and DEX address sent to `removeExchange` are not for the same exchange                             |
+| 328  | Sink       | Only Factory contract can call `removeExchange` entrypoint                                                    |
+| 1001 | Multisig   | Caller is not a multisig admin                                                                                |
+| 1005 | Multisig   | Admin set cannot be empty                                                                                     |
+| 1006 | Multisig   | Threshold is higher than the `admins` set size                                                                |
+| 1007 | Multisig   | Threshold cannot be zero                                                                                      |
+| 1008 | Multisig   | Caller voted already on proposal                                                                              |
+| 1009 | Multisig   | Calling contract is not in `authorized_contract`                                                              |
+| 1010 | Multisig   | `admins` set size must be larger than threshold                                                               |
+| 1012 | Multisig   | The call signature's `source_contract` is not the same as the calling address                                 |
+| 1013 | Multisig   | The proposal's `duration` cannot be zero                                                                      |

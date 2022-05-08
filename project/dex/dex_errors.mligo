@@ -8,15 +8,15 @@
 [@inline] let error_LQT_ADDRESS_IS_NOT_SET = 208n
 [@inline] let error_LQT_CONTRACT_MUST_HAVE_A_MINT_OR_BURN_ENTRYPOINT = 209n
 [@inline] let error_REMOVE_LIQUIDITY_DEADLINE_IS_OVER = 210n
-[@inline] let error_THE_AMOUNT_OF_TOKENS_WITHDRAWN_MUST_BE_GREATER_THAN_OR_EQUAL_TO_MIN_TOKENS_WITHDRAWN = 211n
+[@inline] let error_THE_AMOUNT_OF_TOKEN_A_WITHDRAWN_MUST_BE_GREATER_THAN_OR_EQUAL_TO_MIN_TOKENS_WITHDRAWN = 211n
 [@inline] let error_CANNOT_BURN_MORE_THAN_THE_TOTAL_AMOUNT_OF_LQT = 212n
 [@inline] let error_TOKEN_POOL_MINUS_TOKENS_WITHDRAWN_IS_NEGATIVE = 213n
 [@inline] let error_SWAP_DEADLINE_IS_OVER = 214n
 [@inline] let error_TOKENS_BOUGHT_MUST_BE_GREATER_THAN_OR_EQUAL_TO_MIN_TOKENS_BOUGHT = 215n
 [@inline] let error_TOKEN_POOL_MINUS_TOKENS_BOUGHT_IS_NEGATIVE = 216n
 [@inline] let error_INCORRECT_XTZ_AMOUNT_WAS_SENT = 217n
-(* 218n *)
-(* 219n *)
+[@inline] let error_BALANCE_OF_VIEW_RETURNED_AN_ERROR = 218n
+[@inline] let error_THE_AMOUNT_OF_TOKEN_B_WITHDRAWN_MUST_BE_GREATER_THAN_OR_EQUAL_TO_MIN_TOKENS_WITHDRAWN = 219n
 [@inline] let error_ONLY_MANAGER_CAN_SET_LIQUIDITY_ADDRESS = 220n
 (* 221n *)
 [@inline] let error_NON_EXISTING_ENTRYPOINT2 = 222n
@@ -32,7 +32,7 @@
 [@inline] let error_ONLY_MANAGER_CAN_UPDATE_SINK_ADDRESS = 232n
 [@inline] let error_ONLY_MANAGER_CAN_SET_BAKER = 233n
 [@inline] let error_BAKER_PERMANENTLY_FROZEN = 234n
-[@inline] let error_AMOUNT_MUST_BE_ZERO = 235n
+(* 235n *)
 (* 236n *)
 (* 237n *)
 [@inline] let error_AMOUNT_MUST_BE_SENT = 238n
@@ -42,11 +42,11 @@
 (* 242n *)
 (* 243n *)
 (* 244n *)
-[@inline] let error_REWARDS_TIME_MINUS_LAST_UPDATE_TIME_IS_NEGATIVE = 245n
-[@inline] let error_DELTA_TIME_IS_NEGATIVE = 246n
-[@inline] let error_PERIOD_DURATION_IS_NEGATIVE = 247n
-[@inline] let error_DELTA_REWARD_IS_NEGATIVE = 248n
-[@inline] let error_USER_BALANCE_IS_INSUFFISANT = 249n
+(* 245n *)
+(* 246n *)
+(* 247n *)
+(* 248n *)
+[@inline] let error_USER_BALANCE_IS_INSUFFICIENT = 249n
 [@inline] let error_REWARD_LARGER_THAN_BALANCE = 250n
 [@inline] let error_NO_REWARDS_FOR_THIS_PAIR = 251n
-[@inline] let error_ONLY_MANAGER_CAN_UPDATE_REWARD_PERIOD = 252n
+

@@ -59,7 +59,7 @@ let add_liquidity (param : add_liquidity_param) (store : storage) =
                             | Some addr -> addr in
                         let user_balance = 
                             match (Tezos.call_view "balance_of_view" balance_of_request lqt_address : nat option) with
-                            | None -> (failwith "View returned an error" : nat)
+                            | None -> (failwith(error_BALANCE_OF_VIEW_RETURNED_AN_ERROR) : nat)
                             | Some user_balance -> user_balance in
 
                         let new_user_balance =  user_balance + lqt_minted in

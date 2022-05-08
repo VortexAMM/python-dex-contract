@@ -5,35 +5,41 @@
 [@inline] let error_FA12_CONTRACT_MUST_HAVE_A_TRANSFER_ENTRYPOINT = 105n
 [@inline] let error_FA2_CONTRACT_MUST_HAVE_A_TRANSFER_ENTRYPOINT = 106n
 [@inline] let error_NO_UNIT_CONTRACT = 107n
-[@inline] let error_INITIAL_VALUE_OF_POOL_CANNOT_BE_ZERO = 108n
+(* 108n *)
 [@inline] let error_ONLY_SELF_CAN_SET_LQT_ADDRESS = 109n
 [@inline] let error_DEX_SET_LQT_ADDRESS_DOES_NOT_EXIST = 110n
 [@inline] let error_SELF_SET_LQT_ADDRESS_DOES_NOT_EXIST = 111n
 [@inline] let error_SINK_CONTRAT_HAS_ALREADY_BEEN_DEPLOYED = 112n
 [@inline] let error_PAIR_DOES_NOT_EXIST_FACTORY = 113n
-[@inline] let error_NO_DEX_DEFAULT_ENTRYPOINT = 114n
-[@inline] let error_ONLY_SELF_CAN_SET_REWARDS_ADDRESS = 115n
-[@inline] let error_SELF_SET_REWARDS_ADDRESS_DOES_NOT_EXIST = 116n
-[@inline] let error_DEX_SET_REWARDS_ADDRESS_DOES_NOT_EXIST = 117n
-[@inline] let error_NO_SINK_SET_OPERATOR = 118n
+(* 114n *)
+(* 115n *)
+(* 116n *)
+(* 117n *)
+(* 118n *)
 [@inline] let error_ONLY_SELF_CAN_SET_BAKER = 119n
 [@inline] let error_DEX_HAS_NO_SET_BAKER_ENTRYPOINT = 120n
 [@inline] let error_SELF_SET_BAKER_ENTRYPOINT = 121n
-[@inline] let error_NO_XTZ_AMOUNT_TO_BE_SENT = 122n
-[@inline] let error_XTZ_AMOUNT_SHOULD_BE_SENT = 123n
+[@inline] let error_NO_DEX_TOKENS = 122n
+(* 123n *)
 [@inline] let error_NO_SINK_ADD_EXCHANGE = 124n
-[@inline] let error_ONLY_ADMIN_CAN_SET_CLAIM_LIMIT = 125n
+(* 125n *)
 [@inline] let error_SINK_HAS_NO_UPDATE_CLAIM_LIMIT = 126n
-[@inline] let error_ONLY_ADMIN_CAN_LAUNCH_SINK = 127n
+(* 127n *)
 [@inline] let error_FLAT_CURVE_EXCHANGE_SHOULD_HAVE_EQUAL_POOLS = 128n
-[@inline] let error_ONLY_ADMIN_CAN_UPDATE_SINK_ADDRESS = 129n
+(* 129n *)
 [@inline] let error_COUNTER_OUTSIDE_POOL_LIMIT = 130n
 [@inline] let error_EXCHANGE_HAS_NO_UPDATE_SINK_ENTRYPOINT = 131n
 [@inline] let error_MUTEZ_AMOUNT_SHOULD_BE_EQUAL_TO_AMOUNT_SENT = 132n
-[@inline] let error_REWARD_PERIOD_IS_ZERO = 133n
-[@inline] let error_EXCHANGE_HAS_NO_UPDATE_REWARD_PERIOD_ENTRYPOINT = 134n
-[@inline] let error_ONLY_ADMIN_CAN_UPDATE_REWARD_PERIOD = 135n
+(* 133n *)
+(* 134n *)
+(* 135n *)
 [@inline] let error_EXCHANGE_NOT_IN_PAIRS = 136n
 [@inline] let error_EXCHANGE_NOT_IN_POOLS = 137n
 [@inline] let error_INDEX_NOT_MATCHING_TOKENS = 138n
 [@inline] let error_SINK_HAS_NO_REMOVE_EXCHANGE = 139n
+[@inline] let error_NO_POOL_WITH_CHOSEN_INDEX = 140n
+[@inline] let error_TOKEN_AMOUNT_A_SHOULD_BE_AMOUNT = 141n
+[@inline] let error_TOKEN_AMOUNT_A_SHOULD_BE_MUTEZ = 142n
+[@inline] let error_TOKEN_AMOUNT_B_SHOULD_BE_AMOUNT = 143n
+[@inline] let error_TOKEN_AMOUNT_B_SHOULD_BE_MUTEZ = 144n
+(* 145n *)

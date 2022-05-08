@@ -518,7 +518,7 @@
                           DUG 2 ;
                           COMPARE ;
                           EQ ;
-                          IF { DROP 2 ; PUSH nat 1008 ; FAILWITH }
+                          IF { DROP 2 ; PUSH nat 1013 ; FAILWITH }
                              { SWAP ;
                                DUP ;
                                DUG 2 ;

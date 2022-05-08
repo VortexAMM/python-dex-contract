@@ -18,11 +18,11 @@ let remove_liquidity (param : remove_liquidity_param) (store : storage) : return
         
         if tokens_a_withdrawn < min_token_a_withdrawn then
             (failwith
-                error_THE_AMOUNT_OF_TOKENS_WITHDRAWN_MUST_BE_GREATER_THAN_OR_EQUAL_TO_MIN_TOKENS_WITHDRAWN
+                error_THE_AMOUNT_OF_TOKEN_A_WITHDRAWN_MUST_BE_GREATER_THAN_OR_EQUAL_TO_MIN_TOKENS_WITHDRAWN
             : return)
         else if tokens_b_withdrawn < min_token_b_withdrawn then
           (failwith
-             error_THE_AMOUNT_OF_TOKENS_WITHDRAWN_MUST_BE_GREATER_THAN_OR_EQUAL_TO_MIN_TOKENS_WITHDRAWN
+             error_THE_AMOUNT_OF_TOKEN_B_WITHDRAWN_MUST_BE_GREATER_THAN_OR_EQUAL_TO_MIN_TOKENS_WITHDRAWN
             : return)
         else
             let new_lqt_total =
@@ -71,13 +71,13 @@ let remove_liquidity (param : remove_liquidity_param) (store : storage) : return
                   | Some addr -> addr in
                 let user_balance = 
                   match (Tezos.call_view "balance_of_view" balance_of_request lqt_address : nat option) with
-                  | None -> (failwith "View returned an error" : nat)
+                  | None -> (failwith(error_BALANCE_OF_VIEW_RETURNED_AN_ERROR) : nat)
                   | Some user_balance -> user_balance in
                
                let new_user_balance =
                 match is_a_nat (user_balance - lqt_burned) with
                   | None ->
-                    (failwith error_USER_BALANCE_IS_INSUFFISANT : nat)
+                    (failwith error_USER_BALANCE_IS_INSUFFICIENT : nat)
                   | Some user_balance -> user_balance in
 
                let new_store = update_reward store in 

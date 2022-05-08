@@ -12,4 +12,4 @@ type get_conversion =
             (store.token_pool_a, store.token_pool_b)
         else
             (store.token_pool_b, store.token_pool_a) in
-    compute_out_amount input_amount pool_in pool_out store.curve
+    (compute_out_amount input_amount pool_in pool_out store.curve)

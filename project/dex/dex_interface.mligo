@@ -62,7 +62,7 @@ type parameter =
 | SetBaker of set_baker_param
 | SetLqtAddress of set_lqt_address_param
 | Swap of swap_param
-| UpadteSinkAddress of address
+| UpdateSinkAddress of address
 | UpdateTokenPoolInternal of update_token_pool_internal
 | UpdateTokenPool of update_token_pool_param
 | ClaimReward of address

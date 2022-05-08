@@ -13,6 +13,8 @@
 #include "entrypoints/claim_reward.mligo"
 #include "views/get_conversion.mligo"
 #include "views/get_pools.mligo"
+#include "views/get_tokens.mligo"
+#include "views/get_curve.mligo"
 
 
 let main (action, store : parameter * storage) : return =
@@ -23,7 +25,7 @@ match action with
 | SetBaker p -> set_baker p store
 | SetLqtAddress p -> set_lqt_address p store
 | Swap p -> swap p store
-| UpadteSinkAddress p -> update_sink_address p store
+| UpdateSinkAddress p -> update_sink_address p store
 | UpdateTokenPoolInternal p -> update_token_pool_internal p store
 | UpdateTokenPool -> update_token_pool store
 | ClaimReward p -> claim_reward p store

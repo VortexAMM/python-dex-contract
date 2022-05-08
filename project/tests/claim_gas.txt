@@ -1,7 +1,0 @@
-2 tokens claimed; 41041 gas; 4567 mutez fee; 
-5 tokens claimed; 101268 gas; 10736 mutez fee; 
-10 tokens claimed; 201645 gas; 21019 mutez fee; 
-
-fa1.2
-2 tokens claimed; 41260 gas; 4581 mutez fee; 
-3 tokens claimed; 54961 gas; 5996 mutez fee; 

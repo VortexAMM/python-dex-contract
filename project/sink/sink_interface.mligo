@@ -27,12 +27,6 @@ type add_exchange_param = sink_add_exchange_param
 
 type remove_exchange_param = sink_remove_exchange_param
 
-
-
-
-
-
-
 type sink_deposit_param = sink_deposit_params
 
 type get_address = address * bool

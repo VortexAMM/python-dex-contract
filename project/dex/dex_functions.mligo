@@ -165,10 +165,10 @@ let update_reward (store : storage) : storage =
         Tezos.now in
     let new_reward = 
         abs(rewards_time - store.last_update_time) * store.reward_per_sec in
-//
+
     let new_reward_per_share = store.reward_per_share + new_reward / store.lqt_total in 
     let new_last_update_time = Tezos.now in 
-//
+
     let new_store =
       {
         store with

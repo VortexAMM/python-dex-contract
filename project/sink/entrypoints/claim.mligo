@@ -33,7 +33,7 @@ let claim (param : claim_param) (store : storage) : return =
     
                 let to_reserve =
                     match Big_map.find_opt token store.reserve with
-                    | None -> (failwith(error_TOKEN_TO_RESERVE_NOT_LISTED) : nat)
+                    | None -> (failwith(error_TOKEN_TO_RESERVE_NOT_LISTED) : nat) // UNREACHABLE
                     | Some amt -> amt in
     
                 let op_reserve = 

@@ -90,7 +90,9 @@ disable=raw-checker-failed,
         missing-class-docstring,
         missing-function-docstring,
         missing-module-docstring,
-        too-many-lines
+        too-many-lines,
+        too-many-statements,
+        too-many-instance-attributes
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option

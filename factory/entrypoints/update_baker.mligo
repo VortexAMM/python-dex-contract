@@ -32,12 +32,15 @@ let update_baker (param : update_baker_param) (store : storage) : return =
         (prepare_multisig "updateBaker" param func store), store
     else
         let { baker; first_pool; number_of_pools } = param in
-        let last_pool =
-            if first_pool + number_of_pools > store.counter then
-                store.counter
-            else
-                first_pool + number_of_pools in
-        let ops = ([] : operation list) in
-        let ops = update_baker_rec first_pool last_pool baker ops store in
-        let new_store = { store with default_baker = baker } in
-        ops, new_store
+        if first_pool > store.counter then
+            (failwith(error_FIRST_POOL_TO_UPDATE_IS_OUT_OF_RANGE) : return)
+        else
+            let last_pool =
+                if first_pool + number_of_pools > store.counter then
+                    store.counter
+                else
+                    first_pool + number_of_pools in
+            let ops = ([] : operation list) in
+            let ops = update_baker_rec first_pool last_pool baker ops store in
+            let new_store = { store with default_baker = baker } in
+            ops, new_store

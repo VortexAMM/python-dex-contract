@@ -127,22 +127,22 @@ class SinkStorage:
     exchanges: dict = field(default_factory={})
 
 
-def retry(f):
-    while True:
-        try:
-            f(min_confirmations=2)
-            return True
-        except:
-            pass
+# def retry(f):
+#     while True:
+#         try:
+#             f(min_confirmations=2)
+#             return True
+#         except:
+#             pass
 
 
-def retry_with_opg(f):
-    while True:
-        try:
-            opg = f(min_confirmations=2)
-            return opg
-        except:
-            pass
+# def retry_with_opg(f):
+#     while True:
+#         try:
+#             opg = f(min_confirmations=2)
+#             return opg
+#         except:
+#             pass
 
 
 class Env:
@@ -165,8 +165,8 @@ class Env:
             "paused": init_storage.paused,
             "token_metadata": init_storage.token_metadata,
         }
-        opg = retry_with_opg(fa2.originate(
-            initial_storage=storage).send)
+        opg = fa2.originate(
+            initial_storage=storage).send(**send_conf)
         fa2_addr = OperationResult.from_operation_group(opg.opg_result)[
             0
         ].originated_contracts[0]
@@ -190,7 +190,7 @@ class Env:
             "token_metadata": init_storage.token_metadata,
             "total_supply": init_storage.total_supply,
         }
-        opg = retry_with_opg(fa12.originate(initial_storage=storage).send)
+        opg = fa12.originate(initial_storage=storage).send(**send_conf)
         fa12_addr = OperationResult.from_operation_group(opg.opg_result)[
             0
         ].originated_contracts[0]
@@ -210,8 +210,8 @@ class Env:
             "duration": 3600,
             "authorized_contracts": {init_storage.authorized_contracts},
         }
-        opg = retry_with_opg(multisig.originate(
-            initial_storage=storage).send)
+        opg = multisig.originate(
+            initial_storage=storage).send(**send_conf)
         multisig_address = OperationResult.from_operation_group(
             opg.opg_result)[0].originated_contracts[0]
         multisig = pytezos.using(
@@ -233,8 +233,8 @@ class Env:
             "metadata": init_storage.metadata,
             "token_metadata": init_storage.token_metadata,
         }
-        opg = retry_with_opg(liquidity_token.originate(
-            initial_storage=storage).send)
+        opg = liquidity_token.originate(
+            initial_storage=storage).send(**send_conf)
         liquidity_token_addr = OperationResult.from_operation_group(opg.opg_result)[
             0].originated_contracts[0]
         liquidity_token = pytezos.using(
@@ -256,15 +256,15 @@ class Env:
             "token_claim_limit": init_storage.token_claim_limit,
             "exchanges": init_storage.exchanges,
         }
-        opg = retry_with_opg(sink.originate(
-            initial_storage=storage).send)
+        opg = sink.originate(
+            initial_storage=storage).send(**send_conf)
         sink_addr = OperationResult.from_operation_group(
             opg.opg_result)[0].originated_contracts[0]
         sink = pytezos.using(**self.using_params).contract(sink_addr)
 
         return sink
 
-    def deploy_factory(self, init_storage: FactoryStorage, **kwargs):
+    def deploy_factory(self, init_storage: FactoryStorage):
         with open("../michelson/factory.tz", encoding="UTF-8") as file:
             source = file.read()
 
@@ -285,8 +285,8 @@ class Env:
             "default_user_rewards": init_storage.default_user_rewards,
         }
 
-        opg = retry_with_opg(factory.originate(
-            initial_storage=storage).send)
+        opg = factory.originate(
+            initial_storage=storage).send(**send_conf)
         factory_addr = OperationResult.from_operation_group(opg.opg_result)[
             0
         ].originated_contracts[0]
@@ -294,7 +294,7 @@ class Env:
         multisig_init_storage = MultisigStorage()
         multisig_init_storage.authorized_contracts = factory_addr
         multisig = self.deploy_multisig(multisig_init_storage)
-        retry(factory.updateMultisig(multisig.address).send)
+        factory.updateMultisig(multisig.address).send(**send_conf)
 
         return factory
 
@@ -310,7 +310,7 @@ class Env:
         smak_token = pytezos.using(
             **self.using_params).contract(factory.storage["default_smak_token_type"]["fa12"]())
         print("launch sink")
-        retry(factory.launchSink().send)
+        factory.launchSink().send(**send_conf)
         sink = pytezos.using(
             **self.using_params).contract(factory.storage["default_sink"]())
         multisig = pytezos.using(

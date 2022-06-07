@@ -1,29 +1,45 @@
-# Dcentralized Exchange Contracts
+# Decentralized Exchange Contracts
 
 This is a description of a system composing a Decentralized Exchange (DEX) network.
 
 ## User Instructions:
 
+- Before attempting to do any of the following, make sure that all required modules are installed on your system.
+From the `contracts` folder run `pip install -r requirements.txt` to install all required modules.
+
 ### Smart Contract compilation:
 
-To compile all contracts, enter the `project` folder, and use the command `./compile.sh`.
+To compile all contracts, enter the `contracts` folder, and use the command `make compile`.
 
 ### Testing 
 
 To run the tests, follow these steps: 
-- make sure all contracts are compiled.
-- run `docker-compose up -d` from the root folder of the project (the `project` folder). 
-- run the command `python3 -m unittest *test_module*`, in which *test_module* is one of the following:
-- - `test_env`  
-- - `test_factory`
-- - `test_dex`
-- - `test_sink`
+- run `make TESTNAME` from the root folder of the project (the `contracts` folder).
+  *`TESTNAME`* is one of the following:
+  - `test-env`
+  - `test-factory`
+  - `test-dex`
+  - `test-sink`
+  - `test-multisig`
+
+All contracts are compiled before each time a test runs.
 
 ### Deployment:
+To deploy the contracts:
 
-To deploy the contracts, first choose the network you want to deploy to:
-At file `project/deploy.py`, lines 4-18, make sure that only the line including the `SHELL` and `DEFAULT_BAKER` for your wanted network is uncommented.
-From the `project/tests` folder, run `python3 ../deploy.py`.
+From the root folder of the project (the `contracts` folder) run `make deploy network=NETWORK`
+*NETWORK* is one of the following:
+- `sandbox`
+- `testnet`
+- `mainnet`
+If `mainnet` is chosen, you will be prompted to provide the following: 
+- baker: a baker's address that will be used as the default baker for exchanges with `xtz` as one of the tokens.
+- secret key: the secret key of the address that will be used for deployment and as initial admin of the platform.
+- address: the address (`tz...` address) corresponding to the secret key.
+
+If network is not `mainnet`, two FA1.2 contracts will be deployed, and two exchanges will be launched for simulation.
+
+All contracts are compiled before each deployment.
 
 ## System Architecture
 
@@ -43,6 +59,8 @@ An **FA1.2** standard token contract, handling liquidity shares of all liquidity
 
 - **Sink Reward:**
 A contract that rewards external user when trigering the *swap and burn* mechanism of the *Swap* contract.
+
+- **Multisig:**
 
 
 
@@ -76,7 +94,9 @@ The `product` curve sets a standard constant-product AMM model to the exchange. 
 The factory contract is a contract handling all the system's set up.
 It stores general information about the different exchanges, launches the contracts with default or varying values, and updates general settings for the contracts after launch.
 
-*A multisig contract controls acces to all administration entrypoints, to make administration of the system more decentralized*
+*A multisig contract controls acces to all administration entrypoints, to make administration of the system more decentralized*  
+
+**IMPORTANT: To avoid losing control of the multisig, an adition of multisig admin is recommended, with threshold lower than the number of admins. That way, if some one of the admins lose their keys or get hacked, those admins can be removed and replaced by other admins.**
 
 ### launch_exchange
 This entry-point is used to launch the dex  contract and initialize its storage.
@@ -236,10 +256,11 @@ This entrypoint is used to change the baker for all exchanges with an `XTZ` pool
 In case there are many exchanges, the number of pools for which the baker is updated can be limited.
 The individual exchanges for which the update is made are accessed by their index in the `pools` big_map. updates are made incrementally for all exchanges in the range `first_pool` to `first_pool + number_of pools`.
 
-Input Parameters:
+Input Parameters:  
 `baker : key_hash` the new baker's address.
 `first_pool : nat` the first pool in the update range.
 `number_of_pools` the the number of pools to increment and update over.
+
 ---
 
 ## Dex
@@ -301,7 +322,7 @@ end
 end
 D-->|tokn-a-amount|A
 A--->|tokens A deposited|token-a-ledger
-A--->|tokens A deposited|token-b-ledger
+A--->|tokens B deposited|token-b-ledger
 A-.->|lqt minted|E
 A-.->|tokens A deposited|F
 A-.->|tokens B deposited|G
@@ -618,6 +639,7 @@ Input parameter:
 | 105  | Factory    | FA1.2 contract has no `transfer` entrypoint (for transfer operations)                                         |
 | 106  | Factory    | FA2 contract has no `transfer` entrypoint (for transfer operations)                                           |
 | 107  | Factory    | Contract is not of type `unit` (for transfer operations)                                                      |
+| 108  | Factory    | Chosen `first_pool` for `updateBaker` is out of the factory's pool range                                      |
 | 109  | Factory    | Only factory contract can call `setLqtAddress` entrypoint                                                     |
 | 110  | Factory    | DEX contract has no `setLqtAddress` entrypoint                                                                |
 | 111  | Factory    | Factory contract has no `setLqtAddress` entrypoint                                                            |

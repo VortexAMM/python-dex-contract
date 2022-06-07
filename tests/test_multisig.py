@@ -1,9 +1,9 @@
-from env import Env, ALICE_PK, BOB_PK, pytezos, bob_pytezos, MultisigStorage, send_conf, CHARLIE_PK
-from pytezos.rpc.errors import MichelsonError
-
 import unittest
-
 import logging
+from pytezos.rpc.errors import MichelsonError
+from env import Env, ALICE_PK, BOB_PK, bob_pytezos, MultisigStorage, send_conf, CHARLIE_PK
+
+
 logging.basicConfig(level=logging.INFO)
 
 
@@ -27,6 +27,9 @@ class TestMultisig(unittest.TestCase):
         print("-----------------------------------")
 
     class AddAdmin(unittest.TestCase):
+        def test0_before_tests(self):
+            TestMultisig.print_title(self)
+
         def test01_it_adds_admin(self):
             multisig = Env().deploy_multisig(MultisigStorage())
             self.assertNotIn(BOB_PK, multisig.storage["admins"]())
@@ -55,6 +58,9 @@ class TestMultisig(unittest.TestCase):
             self.assertEqual(err.exception.args[0]["with"], {"int": "1008"})
 
     class AddAuthorizedContract(unittest.TestCase):
+        def test0_before_tests(self):
+            TestMultisig.print_title(self)
+
         def test01_it_adds_authorized_contract(self):
             multisig = Env().deploy_multisig(MultisigStorage())
             self.assertNotIn(
@@ -86,6 +92,9 @@ class TestMultisig(unittest.TestCase):
             self.assertEqual(err.exception.args[0]["with"], {"int": "1008"})
 
     class RemoveAdmin(unittest.TestCase):
+        def test0_before_tests(self):
+            TestMultisig.print_title(self)
+
         def test01_it_removes_admin(self):
             multisig = Env().deploy_multisig(MultisigStorage())
             self.assertNotIn(BOB_PK, multisig.storage["admins"]())
@@ -138,6 +147,9 @@ class TestMultisig(unittest.TestCase):
             self.assertEqual(err.exception.args[0]["with"], {"int": "1010"})
 
     class RemoveAuthorizedContract(unittest.TestCase):
+        def test0_before_tests(self):
+            TestMultisig.print_title(self)
+
         def test01_it_removes_authorized_contract(self):
             multisig = Env().deploy_multisig(MultisigStorage())
             self.assertIn(ALICE_PK, multisig.storage["authorized_contracts"]())
@@ -168,6 +180,9 @@ class TestMultisig(unittest.TestCase):
             self.assertEqual(err.exception.args[0]["with"], {"int": "1008"})
 
     class SetDuration(unittest.TestCase):
+        def test0_before_tests(self):
+            TestMultisig.print_title(self)
+
         def test01_it_sets_duration(self):
             multisig = Env().deploy_multisig(MultisigStorage())
             self.assertEqual(multisig.storage["duration"](), 3600)
@@ -203,6 +218,9 @@ class TestMultisig(unittest.TestCase):
             self.assertEqual(err.exception.args[0]["with"], {"int": "1013"})
 
     class SetThreshold(unittest.TestCase):
+        def test0_before_tests(self):
+            TestMultisig.print_title(self)
+
         def test01_it_sets_threshold(self):
             multisig = Env().deploy_multisig(MultisigStorage())
             self.assertEqual(multisig.storage["threshold"](), 1)

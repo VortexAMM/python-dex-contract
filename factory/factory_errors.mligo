@@ -5,7 +5,7 @@
 [@inline] let error_FA12_CONTRACT_MUST_HAVE_A_TRANSFER_ENTRYPOINT = 105n
 [@inline] let error_FA2_CONTRACT_MUST_HAVE_A_TRANSFER_ENTRYPOINT = 106n
 [@inline] let error_NO_UNIT_CONTRACT = 107n
-(* 108n *)
+[@inline] let error_FIRST_POOL_TO_UPDATE_IS_OUT_OF_RANGE = 108n
 [@inline] let error_ONLY_SELF_CAN_SET_LQT_ADDRESS = 109n
 [@inline] let error_DEX_SET_LQT_ADDRESS_DOES_NOT_EXIST = 110n
 [@inline] let error_SELF_SET_LQT_ADDRESS_DOES_NOT_EXIST = 111n

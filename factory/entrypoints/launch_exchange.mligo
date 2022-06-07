@@ -13,7 +13,7 @@ let launch_exchange(param : launch_exchange_params) (store : storage) : return =
         Big_map.mem (token_b, token_a) store.pairs then
         (failwith error_PAIR_ALREADY_EXISTS : return) // 102
     else
-        let token_amount_a = 
+        let token_amount_a =
             match param.token_amount_a with
             | Mutez p -> 
                 if token_a = Xtz then

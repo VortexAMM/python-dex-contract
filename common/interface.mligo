@@ -224,9 +224,9 @@ type sink_add_exchange_param =
 type sink_remove_exchange_param =
 [@layout:comb]
 {
+  dex_address : address;
   token_a : token_type;
   token_b : token_type;
-  dex_address : address;
 }
 
 

@@ -1,0 +1,21 @@
+{ parameter (or (or (int %decrement) (unit %getReset)) (or (int %increment) (unit %reset))) ;
+  storage int ;
+  code { UNPAIR ;
+         IF_LEFT
+           { IF_LEFT
+               { SWAP ; SUB ; NIL operation ; PAIR }
+               { DROP ;
+                 SELF_ADDRESS ;
+                 CONTRACT %reset unit ;
+                 IF_NONE { PUSH string "no entrypoint" ; FAILWITH } {} ;
+                 PUSH mutez 0 ;
+                 UNIT ;
+                 TRANSFER_TOKENS ;
+                 SWAP ;
+                 NIL operation ;
+                 DIG 2 ;
+                 CONS ;
+                 PAIR } }
+           { IF_LEFT
+               { ADD ; NIL operation ; PAIR }
+               { DROP 2 ; PUSH int 0 ; NIL operation ; PAIR } } } }

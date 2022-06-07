@@ -1,4 +1,5 @@
 let claim_reward (reward_to : address) (store : storage) : return =
+    let () = no_xtz in
     if store.token_type_a <> Xtz && store.token_type_b <> Xtz then
         (failwith(error_NO_REWARDS_FOR_THIS_PAIR) : return)
     else

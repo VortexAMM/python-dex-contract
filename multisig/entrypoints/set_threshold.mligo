@@ -2,9 +2,9 @@ let set_threshold (param : nat) (store : storage) : return =
     if Tezos.sender <> Tezos.self_address then
         let sender_address = Tezos.self_address in
         let func () = 
-            match (Tezos.get_entrypoint_opt "%setThreshold" sender_address : nat contract option) with
-            | None -> (failwith("no setThreshold entrypoint") : operation list)
-            | Some set_threshold_entrypoint -> [Tezos.transaction param 0mutez set_threshold_entrypoint] in
+            let set_threshold_entrypoint =
+                Option.unopt (Tezos.get_entrypoint_opt "%setThreshold" sender_address : nat contract option) in
+            [Tezos.transaction param 0mutez set_threshold_entrypoint] in
         (prepare_multisig "setThreshold" param func), store 
     else if param = 0n then
         (failwith(error_THRESHOLD_CAN_NOT_BE_ZERO) : return)

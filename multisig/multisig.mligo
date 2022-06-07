@@ -12,11 +12,14 @@
 
 
 let main (action, store : parameter * storage) : return =
-match action with
-| CallMultisig p -> call p store
-| AddAdmin p -> add_admin p store
-| RemoveAdmin p -> remove_admin p store
-| SetThreshold p -> set_threshold p store
-| SetDuration p -> set_duration p store
-| AddAuthorizedContract p -> add_authorized_contract p store
-| RemoveAuthorizedContract p -> remove_authorized_contract p store
+if Tezos.amount <> 0tez then
+  (failwith error_THIS_CONTRACT_DOES_NOT_ACCEPT_XTZ)
+else
+    match action with
+    | CallMultisig p -> call p store
+    | AddAdmin p -> add_admin p store
+    | RemoveAdmin p -> remove_admin p store
+    | SetThreshold p -> set_threshold p store
+    | SetDuration p -> set_duration p store
+    | AddAuthorizedContract p -> add_authorized_contract p store
+    | RemoveAuthorizedContract p -> remove_authorized_contract p store

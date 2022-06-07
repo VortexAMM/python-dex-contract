@@ -1,5 +1,5 @@
 [@inline] let error_NOT_AN_ADMIN = 1001n
-(* 1002n *)
+[@inline] let error_THIS_CONTRACT_DOES_NOT_ACCEPT_XTZ = 1002n
 (* 1003n *)
 (* 1004n *)
 [@inline] let error_ADMIN_SET_CANNOT_BE_EMPTY = 1005n

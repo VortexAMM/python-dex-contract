@@ -1,10 +1,10 @@
 let launch_sink (store : storage) : return =
+  let () = no_xtz in
   if Tezos.sender <> store.multisig then
       let sender_address = Tezos.self_address in
       let func () =
-        match (Tezos.get_entrypoint_opt "%launchSink" sender_address : unit contract option) with
-          | None -> (failwith("no launchSink entrypoint") : operation list)
-          | Some launch_sink_entrypoint ->
+        let launch_sink_entrypoint = 
+          Option.unopt (Tezos.get_entrypoint_opt "%launchSink" sender_address : unit contract option) in
             [Tezos.transaction () 0mutez launch_sink_entrypoint]
         in
         (prepare_multisig "launchSink" () func store), store

@@ -1,12 +1,11 @@
 let remove_exchange (param : remove_exchange_param) (store : storage) : return =
+    let () = no_xtz in
     if Tezos.sender <> store.multisig then
       let sender_address = Tezos.self_address in
       let func () =
-        match (Tezos.get_entrypoint_opt "%removeExchange" sender_address : remove_exchange_param contract option) with
-          | None -> (failwith("no removeExchange entrypoint") : operation list)
-          | Some remove_exchange_entrypoint ->
-            [Tezos.transaction param 0mutez remove_exchange_entrypoint]
-        in
+        let remove_exchange_entrypoint =
+            Option.unopt (Tezos.get_entrypoint_opt "%removeExchange" sender_address : remove_exchange_param contract option) in
+        [Tezos.transaction param 0mutez remove_exchange_entrypoint] in
         (prepare_multisig "removeExchange" param func store), store
     else
         let {token_a; token_b; index} = param in

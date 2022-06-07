@@ -1,4 +1,5 @@
 [@inline] let error_DEX_MUST_HAVE_SWAP_ENTRYPOINT = 300n
+[@inline] let error_THIS_ENTRYPOINT_DOES_NOT_ACCEPT_XTZ = 301n
 (* 301n *)
 (* 302n *)
 (* 303n *)

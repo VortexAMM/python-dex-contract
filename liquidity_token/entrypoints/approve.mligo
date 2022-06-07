@@ -10,7 +10,7 @@ let approve (param : approve_param) (storage : storage) : return =
     | None -> 0n in
   begin
     if previous_value > 0n && param.value > 0n
-    then (failwith "UnsafeAllowanceChange")
+      then (failwith "UnsafeAllowanceChange")
     else ();
     let allowances = Big_map.update allowance_key (maybe param.value) allowances in
     (([] : operation list), { storage with allowances = allowances })

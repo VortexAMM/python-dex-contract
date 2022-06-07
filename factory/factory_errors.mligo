@@ -1,3 +1,4 @@
+[@inline] let error_THIS_ENTRYPOINT_DOES_NOT_ACCEPT_XTZ = 100n
 [@inline] let error_TOKENS_ARE_EQUAL = 101n
 [@inline] let error_PAIR_ALREADY_EXISTS = 102n
 [@inline] let error_POOLS_CAN_NOT_BE_EMPTY = 103n
@@ -11,18 +12,18 @@
 [@inline] let error_SELF_SET_LQT_ADDRESS_DOES_NOT_EXIST = 111n
 [@inline] let error_SINK_CONTRAT_HAS_ALREADY_BEEN_DEPLOYED = 112n
 [@inline] let error_PAIR_DOES_NOT_EXIST_FACTORY = 113n
-(* 114n *)
-(* 115n *)
-(* 116n *)
-(* 117n *)
-(* 118n *)
+[@inline] let error_EXCHANGE_HAS_NO_SET_BAKER_ENTRYPOINT = 114n
+[@inline] let error_FACTORY_HAS_NO_UPDATE_BAKER_ENTRYPOINT = 115n
+[@inline] let error_FACTORY_HAS_NO_SET_SINK_CLAIM_LIMIT_ENTRYPOINT = 116n
+[@inline] let error_FACTORY_HAS_NO_UPDATE_MULTISIG_ENTRYPOINT = 117n
+[@inline] let error_FACTORY_HAS_NO_UPDATE_SINK_ADDRESS_ENTRYPOINT = 118n
 [@inline] let error_ONLY_SELF_CAN_SET_BAKER = 119n
 [@inline] let error_DEX_HAS_NO_SET_BAKER_ENTRYPOINT = 120n
 [@inline] let error_SELF_SET_BAKER_ENTRYPOINT = 121n
 [@inline] let error_NO_DEX_TOKENS = 122n
-(* 123n *)
+[@inline] let error_FACTORY_HAS_NO_REMOVE_EXCHANGE_ENTRYPOINT = 123n
 [@inline] let error_NO_SINK_ADD_EXCHANGE = 124n
-(* 125n *)
+[@inline] let error_FACTORY_HAS_NO_LAUNCH_SINK_ENTRYPOINT = 125n
 [@inline] let error_SINK_HAS_NO_UPDATE_CLAIM_LIMIT = 126n
 (* 127n *)
 [@inline] let error_FLAT_CURVE_EXCHANGE_SHOULD_HAVE_EQUAL_POOLS = 128n

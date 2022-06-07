@@ -75,6 +75,8 @@ let make_transfer (opt_id : token_type) (from_addr : address) (to_addr : address
               else
                   Some (Tezos.transaction () (natural_to_mutez token_amount) (get_contract_tez_to to_addr)) 
 
-
+let no_xtz = if Tezos.amount <> 0tez then
+  (failwith error_THIS_ENTRYPOINT_DOES_NOT_ACCEPT_XTZ)
+else ()
 
 #endif

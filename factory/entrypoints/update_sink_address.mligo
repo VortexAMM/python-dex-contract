@@ -33,12 +33,12 @@ let rec updates (counter : nat) (last : nat) (sink_address : address) (operation
         
 
 let update_sink_address (param : update_sink_address_param) (store : storage) : return =
+    let () = no_xtz in
     if Tezos.sender <> store.multisig then
       let sender_address = Tezos.self_address in
       let func () =
-        match (Tezos.get_entrypoint_opt "%updateSinkAddress" sender_address : update_sink_address_param contract option) with
-          | None -> (failwith("no updateSinkAddress entrypoint") : operation list)
-          | Some update_sink_address_entrypoint ->
+        let update_sink_address_entrypoint =
+            Option.unopt (Tezos.get_entrypoint_opt "%updateSinkAddress" sender_address : update_sink_address_param contract option) in
             [Tezos.transaction param 0mutez update_sink_address_entrypoint]
         in
         (prepare_multisig "updateSinkAddress" param func store), store

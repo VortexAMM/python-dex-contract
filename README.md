@@ -41,6 +41,8 @@ If network is not `mainnet`, two FA1.2 contracts will be deployed, and two excha
 
 All contracts are compiled before each deployment.
 
+*Important - When deploying the factory contract, `default_sink_address` has to be `None`, and only after deployment the factory's `launchSink` should be called. This ensures that the correct sink contract is indeed deployed. If the factory was deployed with a different contract, it can be changed to the correct contract by deploying manually the sink contract and calling `updateSinkAddress`, but this should be avoided.*
+
 ## System Architecture
 
 The system is comprised of the following smart-contracts, which interact with each other.
@@ -57,10 +59,9 @@ A contract that collects "buyback fees" from all the different exchanges, swaps 
 - **Liquidity Token:**
 An **FA1.2** standard token contract, handling liquidity shares of all liquidity providers for a given *DEX* contract.
 
-- **Sink Reward:**
-A contract that rewards external user when trigering the *swap and burn* mechanism of the *Swap* contract.
-
 - **Multisig:**
+A contract controlling all administration actions in the system.
+This contract gets called by the attempt to make an administrational action, and ensures that the call is valid. The administrational action has to be called by several different system admins until a `threshold` is satisfied.
 
 
 
@@ -645,11 +646,18 @@ Input parameter:
 | 111  | Factory    | Factory contract has no `setLqtAddress` entrypoint                                                            |
 | 112  | Factory    | Sink contract has already been deployed                                                                       |
 | 113  | Factory    | The pair of tokens sent to `get_dex_address` is not registered in the factory's `pairs`                       |
+| 114  | Factory    | Exchange has no `setBaker` entrypoint                                                                         |
+| 115  | Factory    | Factory has no `updateBaker` entrypoint                                                                       |
+| 116  | Factory    | Factory has no `setSinkClaimLimit` entrypoint                                                                 |
+| 117  | Factory    | Factory has no `updateMultisig` entrypoint                                                                    |
+| 118  | Factory    | Factory has no `updateSinkAddress` entrypoint                                                                 |
 | 119  | Factory    | Only the factory contract can call `setBaker` entrypoint                                                      |
 | 120  | Factory    | DEX contract has no `setBaker` entrypoint                                                                     |
 | 121  | Factory    | Factory contract has no `setBaker` entrypoint                                                                 |
 | 122  | Factory    | DEX contract has no `get_tokens` onchain view                                                                 |
+| 123  | Factory    | Factory has no `removeExchange` entrypoint                                                                    |
 | 124  | Factory    | Sink contract has no `addExchange` entrypoint                                                                 |
+| 125  | Factory    | Factory has no `launchSink` entrypoint                                                                        |
 | 126  | Factory    | Sink contract has no `updateClaimLimit` entrypoint                                                            |
 | 128  | Factory    | A DEX with flat-curve model needs to be deployed with equal pool sizes                                        |
 | 130  | Factory    | Counter sent to `updateSinkAddress` entrypoint is outside the pool count                                      |
@@ -684,6 +692,7 @@ Input parameter:
 | 218  | DEX        | The LP token's `balance_of_view` returned an error                                                            |
 | 219  | DEX        | Amount of `token_b` withdrawn is less than `min_token_b_withdrawn` sent to `removeLiquidity`                  |
 | 220  | DEX        | Only the `manager` can call `setLqtAddress` entrypoint                                                        |
+| 221  | DEX        | A swap was made with no tokens received in return                                                             |
 | 222  | DEX        | Non existing entrypoint FA2 (for `update_token_pool` operation)                                               |
 | 223  | DEX        | Non existing entrypoint FA1.2 (for `update_token_pool` operation)                                             |
 | 224  | DEX        | Invalid FA2 token contract missing `balance_of` (for `update_token_pool` operation)                           |

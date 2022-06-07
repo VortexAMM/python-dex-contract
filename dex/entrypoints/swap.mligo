@@ -34,7 +34,6 @@ let swap (param : swap_param) (store : storage) : return =
                 ) 
             in
 
-
     let burn_amount = tokens_sold * 2n / 10_000n in
     let reserve_amount = tokens_sold / 10_000n in
     let total_fees_in = burn_amount + reserve_amount in
@@ -50,8 +49,9 @@ let swap (param : swap_param) (store : storage) : return =
                 out_total
                 store.curve)
                 in
-
-    if bought < min_tokens_bought then
+    if bought = 0n && Tezos.sender <> store.sink then
+        (failwith(error_NO_TOKENS_WERE_BOUGHT) : return)
+    else if bought < min_tokens_bought then
         (failwith error_TOKENS_BOUGHT_MUST_BE_GREATER_THAN_OR_EQUAL_TO_MIN_TOKENS_BOUGHT : return)
     else
         let (new_pool_a, new_pool_b) =

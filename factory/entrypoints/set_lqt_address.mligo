@@ -1,4 +1,5 @@
 let set_lqt_address(param : set_lqt_address_params) (store : storage) : return =
+    let () = no_xtz in
     if Tezos.sender <> Tezos.self_address then
         (failwith error_ONLY_SELF_CAN_SET_LQT_ADDRESS : return) // 109
     else

@@ -1,4 +1,5 @@
 let remove_liquidity (param : remove_liquidity_param) (store : storage) : return =
+    let () = no_xtz in
       let {
       rem_to = to_;
       lqt_burned;

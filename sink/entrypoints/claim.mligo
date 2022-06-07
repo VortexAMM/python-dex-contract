@@ -3,6 +3,7 @@
 
 
 let claim (param : claim_param) (store : storage) : return =
+    let () = no_xtz in
     let {
         reward_to;
         tokens;

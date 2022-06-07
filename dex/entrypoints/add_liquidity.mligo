@@ -15,6 +15,8 @@ let add_liquidity (param : add_liquidity_param) (store : storage) =
             (failwith(error_INCORRECT_XTZ_AMOUNT_WAS_SENT) : return)
         else if store.token_type_b = Xtz && mutez_to_natural Tezos.amount < amount_token_b then
             (failwith(error_INCORRECT_XTZ_AMOUNT_WAS_SENT) : return)
+        else if store.token_type_a <> Xtz && store.token_type_b <> Xtz && Tezos.amount <> 0mutez then
+            (failwith(error_NO_AMOUNT_TO_BE_SENT) : return)
         else
             let lqt_a = amount_token_a * store.lqt_total / store.token_pool_a in
             let lqt_b = amount_token_b * store.lqt_total / store.token_pool_b in

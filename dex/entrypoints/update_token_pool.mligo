@@ -30,6 +30,7 @@ let update_ended_callback () : operation =
 
 [@inline]
 let update_token_pool_aux (token_id : fa_token) (get_entrypoint2 : unit -> balance_of_response list contract option) (get_entrypoint12 : unit -> nat contract option) : operation =
+  let () = no_xtz in
   let my_address = Tezos.self_address in
   match token_id with
   | FA2 (fa2_address, fa2_token_id) ->

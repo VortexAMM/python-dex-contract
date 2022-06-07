@@ -154,14 +154,9 @@ let launch_exchange(param : launch_exchange_params) (store : storage) : return =
                     | None -> ops
                     | Some op -> op :: ops in
 
-                let set_lqt_address_entrypoint : set_lqt_address_params contract =
-                    match (Tezos.get_entrypoint_opt "%setLqtAddress" Tezos.self_address : 
-                             set_lqt_address_params contract option)
-                    with
-                    | None ->
-                      (failwith error_SELF_SET_LQT_ADDRESS_DOES_NOT_EXIST : set_lqt_address_params contract) // 111 UNREACHABLE
-                    | Some contract -> contract in
-
+                let set_lqt_address_entrypoint =
+                    Option.unopt (Tezos.get_entrypoint_opt "%setLqtAddress" Tezos.self_address : 
+                             set_lqt_address_params contract option) in
                 let set_lqt_address =
                     Tezos.transaction
                         { dex_address = dex_address ; lqt_address = lp_token_address }
@@ -170,10 +165,7 @@ let launch_exchange(param : launch_exchange_params) (store : storage) : return =
                 let ops = set_lqt_address :: ops in
 
                 let set_baker =
-                    match (Tezos.get_entrypoint_opt "%setBaker" Tezos.self_address : set_baker_param contract option) with
-                    | None -> (failwith(error_SELF_SET_BAKER_ENTRYPOINT) : set_baker_param contract) // 121 UNREACHABLE
-                    | Some contr -> contr in
-
+                    Option.unopt (Tezos.get_entrypoint_opt "%setBaker" Tezos.self_address : set_baker_param contract option) in
                 let (freeze_baker, baker) =
                     match (token_a, token_b) with
                     | (Xtz, _) -> (false, (Some store.default_baker))
@@ -193,6 +185,8 @@ let launch_exchange(param : launch_exchange_params) (store : storage) : return =
                 let ops = op_set_baker :: ops in
 
                 let sink_add_exchange =
+                (* This error should be unreachable if the sink was launch using the launchSink entrypoint,
+                but the pattern matching is kept in case the sink was deployed in a different way. *)
                     match (Tezos.get_entrypoint_opt "%addExchange" sink_addr : sink_add_exchange_param contract option) with
                     | None -> (failwith(error_NO_SINK_ADD_EXCHANGE) : sink_add_exchange_param contract) // 124 UNREACHABLE
                     | Some contr -> contr in

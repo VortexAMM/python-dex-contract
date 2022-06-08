@@ -1,6 +1,68 @@
 # Decentralized Exchange Contracts
+*Develpoed by PyratzLabs*
 
 This is a description of a system composing a Decentralized Exchange (DEX) network.
+
+
+## V2 Features
+
+This second version of the Vortex protocol introduces the following new features:
+
+### Factory
+To increase security of the protocol, a factory contract was introduced. This contract handles all management of the different pools.
+This contract launches all pools and their related perripheral contrats, it records essential information about the pools, and controls their attributes.
+
+The factory's different entryponts can be tested by running `make test-factory`.
+To test pool deployment using the factory, run `python3 -m test_factory TestFactory.LaunchExchange` from the `tests` folder.
+
+### Sink
+
+The sink contract gathers all protocol fees.
+It has a mechanism for swapping fees to the protocol's token and burning the outcoming tokens as a way to reduce the token's total supply.
+
+To test the sink, run `make test-sink`
+
+### Generalized swaps
+
+This version introduces generalized swaps.
+In the previous version, two different DEX contracts existed:
+- FA2 DEX for handling swaps with tokens of the FA2 token standard.
+- FA1.2 DEX for handling swaps with tokens of the FA1.2 token standard.
+
+In addition, in the previous version tokens were swapped only to XTZ, and in order to make swaps between two different tokens, the `token2token` method made first a swap from `token_a` to XTZ, and then a second swap from XTZ to `token_b`.
+This method of swapping token-to-token had expensive gas fees, and, because those swaps were actually two consecutive swaps, the platform charged double the fees for the swap.
+This version makes extensive use of variant types and pattern matching, making pools and swaps more flexible.
+The swaps now handle FA2 tokens, FA1.2 tokens and XTZ in the same manner, so swaps can be made between any kind of tokens composing the pair.
+
+Several examples of swap testing can be done. To run a swap test for a specific pair, run one of the following from the `tests` folder:
+- `python3 -m unittest test_dex.TestDex.Swap.test01_it_swaps_successfully_fa12_xtz`
+- `python3 -m unittest test_dex.TestDex.Swap.test02_it_swaps_successfully_xtz_fa12`
+- `python3 -m unittest test_dex.TestDex.Swap.test03_it_swaps_successfully_fa2_xtz`
+- `python3 -m unittest test_dex.TestDex.Swap.test04_it_swaps_successfully_xtz_fa2`
+- `python3 -m unittest test_dex.TestDex.Swap.test05_it_swaps_successfully_fa12_fa2`
+- `python3 -m unittest test_dex.TestDex.Swap.test06_it_swaps_successfully_fa2_fa12`
+- `python3 -m unittest test_dex.TestDex.Swap.test07_it_swaps_successfully_fa12_fa12`
+- `python3 -m unittest test_dex.TestDex.Swap.test08_it_swaps_successfully_fa2_fa2`
+
+### Flat curve model
+
+This version allows the exchange initializer to choose between two different swap models:
+- constant product
+- flat curve
+
+The flat curve gives a 1:1 ratio with very good accuracy, and allows swaps between pegged tokens with very low slippage.
+
+To test a flat curve swap, run from the `tests` folder `python3 -m unittest test_dex.TestDex.Swap.test09_it_swaps_successfully_fa12_fa12_flat`.
+
+### Delegate XTZ
+
+This version enables delegating for DEXs containing XTZ as one of the tokens. Baking rewards are destributed between the Liquidity Providers.
+
+The factory stores a default baker's key hash, and sets this baker as the delegate for all pairs launched with XTZ.
+
+To test baking reward distribution, run from the `tests` folder `python3 -m unittest test_dex.TestDex.Default`
+To test baking reward claims, run `python3 -m unittest test_dex.TestDex.ClaimReward`
+
 
 ## User Instructions:
 

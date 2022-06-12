@@ -1,29 +1,109 @@
 # Decentralized Exchange Contracts
+*Develpoed by PyratzLabs*
 
 This is a description of a system composing a Decentralized Exchange (DEX) network.
 
+
+## V2 Features
+
+This second version of the Vortex protocol introduces the following new features:
+
+### Factory
+To increase security of the protocol, a factory contract was introduced. This contract handles all management of the different pools.
+This contract launches all pools and their related perripheral contrats, it records essential information about the pools, and controls their attributes.
+
+The factory's different entryponts can be tested by running `make test-factory`.
+To test pool deployment using the factory, run `python3 -m test_factory TestFactory.LaunchExchange` from the `tests` folder.
+
+### Sink
+
+The sink contract gathers all protocol fees.
+It has a mechanism for swapping fees to the protocol's token and burning the outcoming tokens as a way to reduce the token's total supply.
+
+To test the sink, run `make test-sink`
+
+### Generalized swaps
+
+This version introduces generalized swaps.
+In the previous version, two different DEX contracts existed:
+- FA2 DEX for handling swaps with tokens of the FA2 token standard.
+- FA1.2 DEX for handling swaps with tokens of the FA1.2 token standard.
+
+In addition, in the previous version tokens were swapped only to XTZ, and in order to make swaps between two different tokens, the `token2token` method made first a swap from `token_a` to XTZ, and then a second swap from XTZ to `token_b`.
+This method of swapping token-to-token had expensive gas fees, and, because those swaps were actually two consecutive swaps, the platform charged double the fees for the swap.
+This version makes extensive use of variant types and pattern matching, making pools and swaps more flexible.
+The swaps now handle FA2 tokens, FA1.2 tokens and XTZ in the same manner, so swaps can be made between any kind of tokens composing the pair.
+
+Several examples of swap testing can be done. To run a swap test for a specific pair, run one of the following from the `tests` folder:
+- `python3 -m unittest test_dex.TestDex.Swap.test01_it_swaps_successfully_fa12_xtz`
+- `python3 -m unittest test_dex.TestDex.Swap.test02_it_swaps_successfully_xtz_fa12`
+- `python3 -m unittest test_dex.TestDex.Swap.test03_it_swaps_successfully_fa2_xtz`
+- `python3 -m unittest test_dex.TestDex.Swap.test04_it_swaps_successfully_xtz_fa2`
+- `python3 -m unittest test_dex.TestDex.Swap.test05_it_swaps_successfully_fa12_fa2`
+- `python3 -m unittest test_dex.TestDex.Swap.test06_it_swaps_successfully_fa2_fa12`
+- `python3 -m unittest test_dex.TestDex.Swap.test07_it_swaps_successfully_fa12_fa12`
+- `python3 -m unittest test_dex.TestDex.Swap.test08_it_swaps_successfully_fa2_fa2`
+
+### Flat curve model
+
+This version allows the exchange initializer to choose between two different swap models:
+- constant product
+- flat curve
+
+The flat curve gives a 1:1 ratio with very good accuracy, and allows swaps between pegged tokens with very low slippage.
+
+To test a flat curve swap, run from the `tests` folder `python3 -m unittest test_dex.TestDex.Swap.test09_it_swaps_successfully_fa12_fa12_flat`.
+
+### Delegate XTZ
+
+This version enables delegating for DEXs containing XTZ as one of the tokens. Baking rewards are destributed between the Liquidity Providers.
+
+The factory stores a default baker's key hash, and sets this baker as the delegate for all pairs launched with XTZ.
+
+To test baking reward distribution, run from the `tests` folder `python3 -m unittest test_dex.TestDex.Default`
+To test baking reward claims, run `python3 -m unittest test_dex.TestDex.ClaimReward`
+
+
 ## User Instructions:
+
+- Before attempting to do any of the following, make sure that all required modules are installed on your system.
+From the `contracts` folder run `pip install -r requirements.txt` to install all required modules.
 
 ### Smart Contract compilation:
 
-To compile all contracts, enter the `project` folder, and use the command `./compile.sh`.
+To compile all contracts, enter the `contracts` folder, and use the command `make compile`.
 
 ### Testing 
 
 To run the tests, follow these steps: 
-- make sure all contracts are compiled.
-- run `docker-compose up -d` from the root folder of the project (the `project` folder). 
-- run the command `python3 -m unittest *test_module*`, in which *test_module* is one of the following:
-- - `test_env`  
-- - `test_factory`
-- - `test_dex`
-- - `test_sink`
+- run `make TESTNAME` from the root folder of the project (the `contracts` folder).
+  *`TESTNAME`* is one of the following:
+  - `test-env`
+  - `test-factory`
+  - `test-dex`
+  - `test-sink`
+  - `test-multisig`
+
+All contracts are compiled before each time a test runs.
 
 ### Deployment:
+To deploy the contracts:
 
-To deploy the contracts, first choose the network you want to deploy to:
-At file `project/deploy.py`, lines 4-11, make sure that only the line including the shell for your wanted network is uncommented.
-From the `project` folder, run `python3 deploy.py`.
+From the root folder of the project (the `contracts` folder) run `make deploy network=NETWORK`
+*NETWORK* is one of the following:
+- `sandbox`
+- `testnet`
+- `mainnet`
+If `mainnet` is chosen, you will be prompted to provide the following: 
+- baker: a baker's address that will be used as the default baker for exchanges with `xtz` as one of the tokens.
+- secret key: the secret key of the address that will be used for deployment and as initial admin of the platform.
+- address: the address (`tz...` address) corresponding to the secret key.
+
+If network is not `mainnet`, two FA1.2 contracts will be deployed, and two exchanges will be launched for simulation.
+
+All contracts are compiled before each deployment.
+
+*Important - When deploying the factory contract, `default_sink_address` has to be `None`, and only after deployment the factory's `launchSink` should be called. This ensures that the correct sink contract is indeed deployed. If the factory was deployed with a different contract, it can be changed to the correct contract by deploying manually the sink contract and calling `updateSinkAddress`, but this should be avoided.*
 
 ## System Architecture
 
@@ -41,8 +121,9 @@ A contract that collects "buyback fees" from all the different exchanges, swaps 
 - **Liquidity Token:**
 An **FA1.2** standard token contract, handling liquidity shares of all liquidity providers for a given *DEX* contract.
 
-- **Sink Reward:**
-A contract that rewards external user when trigering the *swap and burn* mechanism of the *Swap* contract.
+- **Multisig:**
+A contract controlling all administration actions in the system.
+This contract gets called by the attempt to make an administrational action, and ensures that the call is valid. The administrational action has to be called by several different system admins until a `threshold` is satisfied.
 
 
 
@@ -76,7 +157,9 @@ The `product` curve sets a standard constant-product AMM model to the exchange. 
 The factory contract is a contract handling all the system's set up.
 It stores general information about the different exchanges, launches the contracts with default or varying values, and updates general settings for the contracts after launch.
 
-*A multisig contract controls acces to all administration entrypoints, to make administration of the system more decentralized*
+*A multisig contract controls acces to all administration entrypoints, to make administration of the system more decentralized*  
+
+**IMPORTANT: To avoid losing control of the multisig, an adition of multisig admin is recommended, with threshold lower than the number of admins. That way, if some one of the admins lose their keys or get hacked, those admins can be removed and replaced by other admins.**
 
 ### launch_exchange
 This entry-point is used to launch the dex  contract and initialize its storage.
@@ -236,10 +319,11 @@ This entrypoint is used to change the baker for all exchanges with an `XTZ` pool
 In case there are many exchanges, the number of pools for which the baker is updated can be limited.
 The individual exchanges for which the update is made are accessed by their index in the `pools` big_map. updates are made incrementally for all exchanges in the range `first_pool` to `first_pool + number_of pools`.
 
-Input Parameters:
+Input Parameters:  
 `baker : key_hash` the new baker's address.
 `first_pool : nat` the first pool in the update range.
 `number_of_pools` the the number of pools to increment and update over.
+
 ---
 
 ## Dex
@@ -301,7 +385,7 @@ end
 end
 D-->|tokn-a-amount|A
 A--->|tokens A deposited|token-a-ledger
-A--->|tokens A deposited|token-b-ledger
+A--->|tokens B deposited|token-b-ledger
 A-.->|lqt minted|E
 A-.->|tokens A deposited|F
 A-.->|tokens B deposited|G
@@ -605,3 +689,114 @@ This entrypoint is used to set a new duration for calls. If this duration is pas
 
 Input parameter:
 `nat` the new duration (in seconds).
+
+
+## Error Codes:
+
+| Code | Thrown by  | Message                                                                                                       |
+|------|------------|---------------------------------------------------------------------------------------------------------------|
+| 101  | Factory    | The two tokens are equal                                                                                      |
+| 102  | Factory    | The pair already exists                                                                                       |
+| 103  | Factory    | Pools cannot be empty                                                                                         |
+| 104  | Factory    | Sink contract was not deployed yet                                                                            |
+| 105  | Factory    | FA1.2 contract has no `transfer` entrypoint (for transfer operations)                                         |
+| 106  | Factory    | FA2 contract has no `transfer` entrypoint (for transfer operations)                                           |
+| 107  | Factory    | Contract is not of type `unit` (for transfer operations)                                                      |
+| 108  | Factory    | Chosen `first_pool` for `updateBaker` is out of the factory's pool range                                      |
+| 109  | Factory    | Only factory contract can call `setLqtAddress` entrypoint                                                     |
+| 110  | Factory    | DEX contract has no `setLqtAddress` entrypoint                                                                |
+| 111  | Factory    | Factory contract has no `setLqtAddress` entrypoint                                                            |
+| 112  | Factory    | Sink contract has already been deployed                                                                       |
+| 113  | Factory    | The pair of tokens sent to `get_dex_address` is not registered in the factory's `pairs`                       |
+| 114  | Factory    | Exchange has no `setBaker` entrypoint                                                                         |
+| 115  | Factory    | Factory has no `updateBaker` entrypoint                                                                       |
+| 116  | Factory    | Factory has no `setSinkClaimLimit` entrypoint                                                                 |
+| 117  | Factory    | Factory has no `updateMultisig` entrypoint                                                                    |
+| 118  | Factory    | Factory has no `updateSinkAddress` entrypoint                                                                 |
+| 119  | Factory    | Only the factory contract can call `setBaker` entrypoint                                                      |
+| 120  | Factory    | DEX contract has no `setBaker` entrypoint                                                                     |
+| 121  | Factory    | Factory contract has no `setBaker` entrypoint                                                                 |
+| 122  | Factory    | DEX contract has no `get_tokens` onchain view                                                                 |
+| 123  | Factory    | Factory has no `removeExchange` entrypoint                                                                    |
+| 124  | Factory    | Sink contract has no `addExchange` entrypoint                                                                 |
+| 125  | Factory    | Factory has no `launchSink` entrypoint                                                                        |
+| 126  | Factory    | Sink contract has no `updateClaimLimit` entrypoint                                                            |
+| 128  | Factory    | A DEX with flat-curve model needs to be deployed with equal pool sizes                                        |
+| 130  | Factory    | Counter sent to `updateSinkAddress` entrypoint is outside the pool count                                      |
+| 131  | Factory    | DEX contract has no `updateSink` entrypoint                                                                   |
+| 132  | Factory    | One of the launched DEX tokens is `xtz` and the `amount` sent at launch is not correct                        |
+| 136  | Factory    | The pair of tokens sent to `removeExchange` entrypoint does not fit any DEX registered                        |
+| 137  | Factory    | The index sent to `removeExchange` entrypoint does not fit any DEX registered                                 |
+| 138  | Factory    | The pair of tokens and the index sent to `removeExchange` entrypoint are of different DEXs                    |
+| 139  | Factory    | Sink contract does not have a `removeExchange` entrypoint                                                     |
+| 140  | Factory    | Index sent tp `get_dex_by_index` onchain view does not fit any DEX registered                                 |
+| 141  | Factory    | `token_amount_a` type should be `amount` (for token sent to `launchExchange` entrypoint)                      |
+| 142  | Factory    | `token_amount_a` type should be `mutez` (for `xtz` sent to `launchExchange entrypoint)                        |
+| 143  | Factory    | `token_amount_b` type should be `amount` (for token sent to `launchExchange` entrypoint)                      |
+| 144  | Factory    | `token_amount_b` type should be `mutez` (for `xtz` sent to `launchExchange entrypoint)                        |
+| 201  | DEX        | `updateTokenPool` operation is in progress                                                                    |
+| 202  | DEX        | Deadline is over for `addLiquidity` request                                                                   |
+| 203  | DEX        | `max_tokens_deposited` sent to `addLiquidity` entrypoint is exceeded                                          |
+| 204  | DEX        | LP tokens minted for LP are less than `min_lqt_minted` sent to `addLiquidity` entrypoint                      |
+| 205  | DEX        | FA1.2 contract has no `transfer` entrypoint (for transfer operations)                                         |
+| 206  | DEX        | FA2 contract has no `transfer` entrypoint (for transfer operations)                                           |
+| 207  | DEX        | Contract is not of type `unit` (for transfer operations)                                                      |
+| 208  | DEX        | `lqt_address` is not set                                                                                      |
+| 209  | DEX        | LP token contract has no `mintOrBurn` entrypoint                                                              |
+| 210  | DEX        | Deadline is over for `removeLiquidity` request                                                                |
+| 211  | DEX        | Amount of `token_a` withdrawn is less than `min_token_a_withdrawn` sent to `removeLiquidity`                  |
+| 212  | DEX        | `lqt_burned` sent to `removeLiquidity` is higher than the DEX's `lqt_total`                                   |
+| 213  | DEX        | Tokens withdrawn by `removeLiquidity` operation is more than the token's pool size                            |
+| 214  | DEX        | Deadline is over for `swap` request                                                                           |
+| 215  | DEX        | The tokens bought by the swap are less than `min_tokens_bought` sent to the `swap` entrypoint                 |
+| 216  | DEX        | Tokens bought at swap are more than the token's pool size                                                     |
+| 217  | DEX        | Incorrect `amount` was sent to `addLiquidity` entrypoint                                                      |
+| 218  | DEX        | The LP token's `balance_of_view` returned an error                                                            |
+| 219  | DEX        | Amount of `token_b` withdrawn is less than `min_token_b_withdrawn` sent to `removeLiquidity`                  |
+| 220  | DEX        | Only the `manager` can call `setLqtAddress` entrypoint                                                        |
+| 221  | DEX        | A swap was made with no tokens received in return                                                             |
+| 222  | DEX        | Non existing entrypoint FA2 (for `update_token_pool` operation)                                               |
+| 223  | DEX        | Non existing entrypoint FA1.2 (for `update_token_pool` operation)                                             |
+| 224  | DEX        | Invalid FA2 token contract missing `balance_of` (for `update_token_pool` operation)                           |
+| 225  | DEX        | Invalid FA1.2 token contract missing `get_balance` (for `update_token_pool` operation)                        |
+| 226  | DEX        | Invalid FA2 balance response (for `update_token_pool` operation)                                              |
+| 227  | DEX        | `update_token_ended` function not found in DEX contract (for `update_token_pool` operation)                   |
+| 228  | DEX        | Call not from an implicit account (for `update_token_pool` operation)                                         |
+| 229  | DEX        | `self_is_updating_token_pool` must be false to call entrypoint                                                |
+| 230  | DEX        | This entrypoint may be called only by `get_balance` of the token contract (for `update_token_pool` operation) |
+| 231  | DEX        | No amount to be sent                                                                                          |
+| 232  | DEX        | Only `manager` can update the sink's address                                                                  |
+| 233  | DEX        | Only `manager` can set baker                                                                                  |
+| 234  | DEX        | Baker is pemanently frozen                                                                                    |
+| 238  | DEX        | Amount must be sent                                                                                           |
+| 239  | DEX        | Sink contract has no `deposit` entrypoint                                                                     |
+| 249  | DEX        | User's LP token balance is not enough for `removeLiquidity` operation                                         |
+| 250  | DEX        | User's baker reward is larger than the contract's balance                                                     |
+| 251  | DEX        | No baker rewards for this DEX                                                                                 |
+| 300  | Sink       | DEX contract has no `swap` entrypoint                                                                         |
+| 304  | Sink       | FA2 contract has no `updateOperators` entrypoint                                                              |
+| 305  | Sink       | FA1.2 contract has no `approve` entrypoint                                                                    |
+| 306  | Sink       | FA1.2 contract has no `transfer` entrypoint                                                                   |
+| 307  | Sink       | FA2 contract has no `transfer` entrypoint                                                                     |
+| 308  | Sink       | No `unit` contract found                                                                                      |
+| 313  | Sink       | Token to burn is not listed                                                                                   |
+| 314  | Sink       | Token to reserve is not listed                                                                                |
+| 317  | Sink       | Token list is larger than `claim_limit`                                                                       |
+| 318  | Sink       | Only Factory contract can call `updateClaimLimit` entrypoint                                                  |
+| 319  | Sink       | Only Factory contract can call `addExchange` entrypoint                                                       |
+| 320  | Sink       | No smak-to-token exchange exists                                                                              |
+| 321  | Sink       | Token pair does not exist in the contract's `exchanges`                                                       |
+| 322  | Sink       | Only a listed DEX contract can deposit tokens                                                                 |
+| 323  | Sink       | Empty token list was sent to claim                                                                            |
+| 324  | Sink       | Exchange to remove is not listed                                                                              |
+| 327  | Sink       | Token pair and DEX address sent to `removeExchange` are not for the same exchange                             |
+| 328  | Sink       | Only Factory contract can call `removeExchange` entrypoint                                                    |
+| 1001 | Multisig   | Caller is not a multisig admin                                                                                |
+| 1005 | Multisig   | Admin set cannot be empty                                                                                     |
+| 1006 | Multisig   | Threshold is higher than the `admins` set size                                                                |
+| 1007 | Multisig   | Threshold cannot be zero                                                                                      |
+| 1008 | Multisig   | Caller voted already on proposal                                                                              |
+| 1009 | Multisig   | Calling contract is not in `authorized_contract`                                                              |
+| 1010 | Multisig   | `admins` set size must be larger than threshold                                                               |
+| 1012 | Multisig   | The call signature's `source_contract` is not the same as the calling address                                 |
+| 1013 | Multisig   | The proposal's `duration` cannot be zero                                                                      |
